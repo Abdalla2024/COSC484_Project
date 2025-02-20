@@ -10,14 +10,14 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-      <main className="container mx-auto px-4">
+      <div className="w-full overflow-x-auto">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>
-      </main>
+      </div>
     </div>
   )
 }
