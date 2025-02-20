@@ -1,40 +1,58 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { FaCommentAlt, FaPlus, FaUserCircle } from 'react-icons/fa'
 
 function Navbar() {
+  const navigate = useNavigate();
+
   return (
-    <nav className="bg-white shadow-md p-2 fixed top-0 left-0 right-0 z-50 overflow-x-auto">
-      <div className="w-full flex justify-between items-center min-w-[1200px]">
-        {/* Logo */}
-        <Link to="/" className="h-20 ml-16">
-          <img 
-            src="/towson-logo.png" 
-            alt="Towson University Logo" 
-            className="h-full object-contain"
-          />
-        </Link>
-
-        {/* Marketplace Title with Icon */}
-        <div className="flex items-center gap-4">
-          <img 
-            src="/market-icon.png"
-            alt="Market Icon"
-            className="h-12 w-12 object-contain"
-          />
-          <h1 className="text-5xl font-bold text-black">
-            Marketplace
-          </h1>
-        </div>
-
-        {/* Profile Icon */}
-        <Link to="/profile" className="flex items-center mr-32">
-          <div className="w-14 h-14 overflow-hidden rounded-full border-2 border-gray-300">
+    <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-20 items-center">
+          {/* Logo */}
+          <Link to="/" className="flex items-center">
             <img 
-              src="/default-profile.png" 
-              alt="Profile" 
-              className="w-full h-full object-cover"
+              src="/towson-logo.png"
+              alt="Towson University"
+              className="h-16 object-contain"
             />
+          </Link>
+
+          {/* Marketplace Title with Icon */}
+          <div className="flex items-center gap-4">
+            <img 
+              src="/market-icon.png"
+              alt="Market Icon"
+              className="h-12 w-12 object-contain"
+            />
+            <h1 className="text-5xl font-bold text-black">
+              Marketplace
+            </h1>
           </div>
-        </Link>
+
+          {/* Messages, Sell, and Profile Icons */}
+          <div className="flex items-center gap-8">
+            <Link 
+              to="/messages" 
+              className="text-gray-600 hover:text-yellow-500 transition-colors"
+            >
+              <FaCommentAlt className="w-8 h-8" />
+            </Link>
+            
+            <Link 
+              to="/sell" 
+              className="text-gray-600 hover:text-yellow-500 transition-colors"
+            >
+              <FaPlus className="w-8 h-8" />
+            </Link>
+
+            <Link 
+              to="/profile" 
+              className="text-gray-600 hover:text-yellow-500 transition-colors"
+            >
+              <FaUserCircle className="w-12 h-12" />
+            </Link>
+          </div>
+        </div>
       </div>
     </nav>
   )

@@ -6,6 +6,8 @@ import ProductDetail from './pages/ProductDetail'
 import Profile from './pages/Profile'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
+import Messages from './pages/Messages'
+import Sell from './pages/Sell'
 import './App.css'
 
 function App() {
@@ -23,6 +25,8 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/sell" element={<Sell />} />
         </Routes>
       </div>
     </div>
