@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 function Home() {
   const categories = ['Textbooks', 'Electronics', 'Furniture', 'Clothing', 'School Supplies', 'Dorm Essentials', 
     'Sports Equipment', 'Musical Instruments', 'Art Supplies', 'Lab Equipment'];
@@ -39,7 +41,11 @@ function Home() {
       <div className="ml-64 flex-1 p-6 pt-24 min-w-0">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 pt-6">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-            <div key={item} className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <Link 
+              to={`/listing/${item}`} 
+              key={item} 
+              className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+            >
               <div className="aspect-[4/3] relative">
                 <img
                   src={`https://picsum.photos/seed/${item}/800/600`}
@@ -52,12 +58,12 @@ function Home() {
                 <p className="text-gray-600 text-sm mb-2">Brief description here</p>
                 <p className="text-yellow-600 font-bold">${(Math.random() * 100).toFixed(2)}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Home 
+export default Home; 
