@@ -1,6 +1,11 @@
+// Import FirebaseAuth and firebase.
+import React from 'react';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+//comment/
+//a
 function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -9,13 +14,15 @@ function SignIn() {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Add your authentication logic here
-    
+
     // For now, just navigate to home page
     navigate('/');
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
+
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md border border-gray-200">
         <div>
           <h2 className="text-left text-3xl font-extrabold text-gray-700">
@@ -65,7 +72,7 @@ function SignIn() {
             </button>
           </div>
         </form>
-        
+
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{' '}
