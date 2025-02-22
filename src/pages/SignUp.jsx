@@ -1,20 +1,54 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  auth
+} from "../auth/firebaseconfig";
 function SignUp() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-
+  const handleEmail = (e) => {
+    setEmail(e.target.value);
+    setError("");
+  }
   const handleSubmit = (e) => {
     e.preventDefault();
     // Add your signup logic here
-    
-    // For now, just navigate to home page
-    navigate('/');
+    if (password != confirmPassword) {
+      setError("Password Do Not Match");
+      return;
+    }
+    if (!email.includes("@students.towson.edu")) {
+      setError("Email Has to Be TU School Account")
+      return;
+    }
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed up 
+        const user = userCredential.user;
+        console.log(user);
+        updateProfile(auth.currentUser, {
+          displayName: `${firstName} ${lastName}`
+        }).then(() => {
+          navigate('/');
+        }).catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setError(errorMessage);
+        });
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        setError(errorMessage);
+      });
+
   };
 
   return (
@@ -69,7 +103,7 @@ function SignUp() {
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 bg-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 placeholder="Enter your school email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmail}
               />
             </div>
             <div className="text-left">
@@ -112,8 +146,14 @@ function SignUp() {
               Sign up
             </button>
           </div>
+          {error ?
+            <div>
+              <p className="text-red-600">
+                {error}
+              </p>
+            </div> : null}
         </form>
-        
+
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Already have an account?{' '}
