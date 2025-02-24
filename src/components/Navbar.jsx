@@ -39,6 +39,13 @@ function Navbar() {
             </Link>
             
             <Link 
+              to="/my-listings" 
+              className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md"
+            >
+              My Listings
+            </Link>
+
+            <Link 
               to="/sell" 
               className="text-gray-600 hover:text-yellow-500 transition-colors"
             >
