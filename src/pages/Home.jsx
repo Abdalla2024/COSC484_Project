@@ -50,7 +50,7 @@ function Home() {
   ];
 
   return (
-    <div className="flex bg-white w-full min-w-[1200px]">
+    <div className="flex bg-white w-full">
       {/* Sidebar */}
       <div className="w-64 fixed left-0 h-[calc(100vh-64px)] bg-gray-50" style={{ top: '84px' }}>
         <div className="h-full overflow-y-auto">
