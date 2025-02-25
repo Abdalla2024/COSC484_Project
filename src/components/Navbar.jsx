@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { FaCommentAlt, FaPlus, FaUserCircle } from 'react-icons/fa'
 import { useState } from 'react'
 
 function Navbar() {
@@ -18,69 +19,51 @@ function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center space-x-4">
-            <Link to="/" className="flex items-center space-x-2">
+        <div className="flex justify-between h-20 items-center">
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center">
               <img 
-                src="src/assets/tu-logo.png" 
-                alt="Towson University" 
-                className="h-8"
+                src="/towson-logo.png"
+                alt="Towson University"
+                className="h-16 object-contain"
               />
-              <div className="flex items-center">
-                <span className="text-xl font-bold text-[#FFB800]">Marketplace</span>
-              </div>
             </Link>
           </div>
-          
-          <div className="flex items-center space-x-6">
+
+          {/* Marketplace Title with Icon */}
+          <div className="flex items-center gap-4">
+            <img 
+              src="/market-icon.png"
+              alt="Market Icon"
+              className="h-12 w-12 object-contain"
+            />
+            <h1 className="text-5xl font-bold text-black">
+              Marketplace
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-8">
+            <Link 
+              to="/messages" 
+              className="text-gray-600 hover:text-yellow-500 transition-colors"
+            >
+              <FaCommentAlt className="w-8 h-8" />
+            </Link>
+            
             <Link 
               to="/sell" 
-              className="text-gray-700 hover:text-[#FFB800] px-3 py-2 rounded-md transition-colors"
+              className="text-gray-600 hover:text-yellow-500 transition-colors"
             >
-              Sell
-            </Link>
-
-            {/* Messages Icon */}
-            <Link
-              to="/messages"
-              className="text-gray-700 hover:text-[#FFB800] transition-colors"
-            >
-              <svg 
-                className="w-6 h-6" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth="2" 
-                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4-4-4z"
-                />
-              </svg>
+              <FaPlus className="w-8 h-8" />
             </Link>
 
             {/* Profile Dropdown */}
             <div className="relative">
               <button
                 onClick={toggleDropdown}
-                className="flex items-center focus:outline-none"
+                className="text-gray-600 hover:text-yellow-500 transition-colors focus:outline-none p-0 border-none bg-transparent"
               >
-                <div className="w-10 h-10 flex items-center justify-center hover:text-[#FFB800] transition-colors">
-                  <svg 
-                    className="w-6 h-6 text-gray-600" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth="2" 
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" 
-                    />
-                  </svg>
-                </div>
+                <FaUserCircle className="w-12 h-12" />
               </button>
 
               {/* Dropdown Menu */}
@@ -102,7 +85,7 @@ function Navbar() {
                   </Link>
                   <button
                     onClick={handleSignOut}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="block w-full text-center px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-700 transition-colors"
                   >
                     Sign Out
                   </button>
