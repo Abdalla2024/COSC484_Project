@@ -54,13 +54,13 @@ function Listing() {
   });
 
   return (
-    <div className="min-h-screen pt-24 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="absolute inset-0 bg-gray-50 pt-20">
+      <div className="w-full max-w-7xl mx-auto px-4 py-6">
         <div className="flex flex-col space-y-6">
           {/* Header */}
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h1 className="text-2xl font-bold text-gray-900">My Listings</h1>
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap gap-2">
               {filters.map(filter => (
                 <button
                   key={filter.id}
@@ -78,7 +78,7 @@ function Listing() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { label: 'Total Listings', value: mockListings.length },
               { label: 'Active Listings', value: mockListings.filter(l => l.status === 'active').length },
