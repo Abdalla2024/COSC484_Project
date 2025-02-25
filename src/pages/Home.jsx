@@ -50,11 +50,10 @@ function Home() {
   ];
 
   return (
-    <div className="flex bg-white w-full min-w-[1200px]">
-      {/* Sidebar */}
-      <div className="w-64 fixed left-0 h-[calc(100vh-64px)] bg-gray-50" style={{ top: '84px' }}>
-        <div className="h-full overflow-y-auto">
-          {/* Search Bar */}
+    <div className="min-h-screen bg-white pt-20">
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="w-64 fixed left-0 top-20 bottom-0 bg-gray-50 overflow-y-auto">
           <div className="p-4 pt-8">
             <input
               type="text"
@@ -63,7 +62,6 @@ function Home() {
             />
           </div>
 
-          {/* Categories */}
           <div className="p-4">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               Categories
@@ -80,16 +78,18 @@ function Home() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="ml-64 flex-1 p-6 pt-24 min-w-0">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 pt-6">
-          {mockListings.map(listing => (
-            <Link to={`/listing/${listing.id}`} key={listing.id}>
-              <ListingCard listing={listing} />
-            </Link>
-          ))}
+        {/* Main Content */}
+        <div className="flex-1 ml-64 p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
+            {mockListings.map(listing => (
+              <Link to={`/listing/${listing.id}`} key={listing.id} className="h-full">
+                <div className="h-full">
+                  <ListingCard listing={listing} />
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>
