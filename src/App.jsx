@@ -9,6 +9,7 @@ import SignUp from './pages/SignUp'
 import Messages from './pages/Messages'
 import Sell from './pages/Sell'
 import Listing from './pages/Listing'
+import MyListings from './pages/MyListings'
 import './App.css'
 
 function App() {
@@ -28,7 +29,9 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/sell" element={<Sell />} />
+          <Route path="/my-listings" element={<MyListings />} />
           <Route path="/listing/:id" element={<Listing />} />
+
         </Routes>
       </div>
     </div>
