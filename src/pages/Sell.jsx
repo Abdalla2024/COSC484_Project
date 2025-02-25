@@ -36,7 +36,7 @@ function Sell() {
   };
 
   return (
-    <div className="absolute inset-0 bg-gray-50 pt-20">
+    <div className="min-h-screen bg-gray-50 pt-20">
       <div className="w-full max-w-3xl mx-auto px-4 py-6">
         <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
           <div className="text-center">
