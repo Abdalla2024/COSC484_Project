@@ -86,8 +86,10 @@ function Home() {
       <div className="ml-64 flex-1 p-6 pt-24 min-w-0">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 pt-6">
           {mockListings.map(listing => (
-            <Link to={`/listing/${listing.id}`} key={listing.id}>
-              <ListingCard listing={listing} />
+            <Link to={`/listing/${listing.id}`} key={listing.id} className="h-full">
+              <div className="h-full">
+                <ListingCard listing={listing} />
+              </div>
             </Link>
           ))}
         </div>

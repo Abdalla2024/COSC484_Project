@@ -10,10 +10,10 @@ function ListingCard({ listing }) {
 
   return (
     <div 
-      className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
+      className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 cursor-pointer hover:shadow-md transition-shadow h-full flex flex-col"
       onClick={handleClick}
     >
-      <div className="aspect-[4/3] relative">
+      <div className="w-full aspect-[4/3] relative">
         <img
           src={listing.imageUrl || 'https://via.placeholder.com/400x300'}
           alt={listing.title}
@@ -29,18 +29,20 @@ function ListingCard({ listing }) {
           </span>
         </div>
       </div>
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-grow">
         <h3 className="font-semibold text-gray-900 truncate">{listing.title}</h3>
         <p className="text-gray-600 text-sm mb-2 truncate">{listing.description}</p>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-900 font-bold">${listing.price}</span>
-          <span className="text-sm text-gray-500">{listing.date}</span>
-        </div>
-        {listing.offers > 0 && (
-          <div className="mt-2 text-sm text-gray-600">
-            {listing.offers} offer{listing.offers > 1 ? 's' : ''}
+        <div className="mt-auto">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-900 font-bold">${listing.price}</span>
+            <span className="text-sm text-gray-500">{listing.date}</span>
           </div>
-        )}
+          {listing.offers > 0 && (
+            <div className="mt-2 text-sm text-gray-600">
+              {listing.offers} offer{listing.offers > 1 ? 's' : ''}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
