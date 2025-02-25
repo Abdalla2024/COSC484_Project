@@ -37,14 +37,14 @@ function Navbar() {
             </Link>
           </div>
 
-          {/* Marketplace Title with Icon - Hidden on very small screens */}
-          <div className="hidden sm:flex items-center gap-2 md:gap-4">
+          {/* Marketplace Title with Icon - Icon always visible, text hidden on very small screens */}
+          <div className="flex items-center gap-2 md:gap-4">
             <img 
               src="/market-icon.png"
               alt="Market Icon"
               className="h-8 w-8 md:h-12 md:w-12 object-contain"
             />
-            <h1 className="text-3xl md:text-5xl font-bold text-black">
+            <h1 className="hidden sm:block text-3xl md:text-5xl font-bold text-black">
               Marketplace
             </h1>
           </div>
