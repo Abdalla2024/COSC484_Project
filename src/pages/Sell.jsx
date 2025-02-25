@@ -36,8 +36,8 @@ function Sell() {
   };
 
   return (
-    <div className="min-h-screen pt-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="max-w-3xl mx-auto">
+    <div className="absolute inset-0 bg-gray-50 pt-20">
+      <div className="w-full max-w-3xl mx-auto px-4 py-6">
         <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900">List Your Item</h2>
