@@ -8,8 +8,7 @@ function Sell() {
     category: '',
     title: '',
     description: '',
-    price: '',
-    priceType: 'fixed', // 'fixed' or 'negotiable'
+    price: '0',
     notes: '',
     images: []
   });
@@ -22,63 +21,84 @@ function Sell() {
     }));
   };
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length < 3) {
-      alert('Please upload at least 3 images');
-      return;
-    }
+  const handlePriceChange = (e) => {
+    const value = Math.max(0, Number(e.target.value));
     setProductData(prev => ({
       ...prev,
-      images: files
+      price: value.toString()
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Here you would typically send the data to your backend
-    console.log('Form submitted:', productData);
+    console.log(productData);
+    // Add your submission logic here
   };
 
   return (
-    <div className="min-h-screen pt-24 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden p-6">
+    <div className="min-h-screen pt-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900">List Your Item</h2>
+            <p className="mt-2 text-sm text-gray-600">Fill in the details below to list your item for sale</p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Category Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Category
-                <select
-                  name="category"
-                  value={productData.category}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-1 focus:ring-gray-300"
-                  required
-                >
-                  <option value="">Select a category</option>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
               </label>
+              <select
+                name="category"
+                value={productData.category}
+                onChange={handleInputChange}
+                className="w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                required
+              >
+                <option value="">Select a category</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
             </div>
 
+            {/* Title */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Product Title
-                <input
-                  type="text"
-                  name="title"
-                  value={productData.title}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 focus:outline-none focus:ring-1 focus:ring-gray-300"
-                  required
-                />
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Title
               </label>
+              <input
+                type="text"
+                name="title"
+                value={productData.title}
+                onChange={handleInputChange}
+                className="w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                required
+                placeholder="Enter the title of your item"
+              />
             </div>
 
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description
+              </label>
+              <textarea
+                name="description"
+                value={productData.description}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                required
+                placeholder="Describe your item"
+              />
+            </div>
+
+            {/* Price */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Price
@@ -91,15 +111,15 @@ function Sell() {
                     min="0"
                     max="1000"
                     value={productData.price}
-                    onChange={handleInputChange}
+                    onChange={handlePriceChange}
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                   />
                   <input
                     type="number"
                     name="price"
                     value={productData.price}
-                    onChange={handleInputChange}
-                    className="w-24 rounded-md border border-gray-300 bg-white py-2 px-3 text-black focus:outline-none focus:ring-1 focus:ring-gray-300"
+                    onChange={handlePriceChange}
+                    className="w-24 rounded-md border border-gray-300 bg-white py-2 px-3 text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
                     min="0"
                   />
                 </div>
@@ -109,58 +129,30 @@ function Sell() {
               </div>
             </div>
 
+            {/* Additional Notes */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Description
-                <textarea
-                  name="description"
-                  value={productData.description}
-                  onChange={handleInputChange}
-                  rows={4}
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 focus:outline-none focus:ring-1 focus:ring-gray-300"
-                  required
-                />
-              </label>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Additional Notes
-                <textarea
-                  name="notes"
-                  value={productData.notes}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 focus:outline-none focus:ring-1 focus:ring-gray-300"
-                />
               </label>
+              <textarea
+                name="notes"
+                value={productData.notes}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-300"
+                placeholder="Any additional information (optional)"
+              />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Upload Images (minimum 3)
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="mt-1 block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-white file:text-gray-700
-                    hover:file:bg-gray-50"
-                  required
-                />
-              </label>
+            {/* Submit Button */}
+            <div className="pt-4">
+              <button
+                type="submit"
+                className="w-full bg-[#FFB800] text-white py-2 px-4 rounded-md hover:bg-[#E5A600] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFB800]"
+              >
+                List Item
+              </button>
             </div>
-
-            <button
-              type="submit"
-              className="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-            >
-              Create Listing
-            </button>
           </form>
         </div>
       </div>
