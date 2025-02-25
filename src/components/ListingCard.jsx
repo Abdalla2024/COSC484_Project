@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function ListingCard({ listing }) {
-  const [productData, setProductData] = useState({
-    category: '',
-    title: '',
-    description: '',
-    price: '0',
-    notes: '',
-    images: []
-  });
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/listing/${listing.id}`);
+  };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
+    <div 
+      className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
+      onClick={handleClick}
+    >
       <div className="aspect-[4/3] relative">
         <img
           src={listing.imageUrl || 'https://via.placeholder.com/400x300'}
