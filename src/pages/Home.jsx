@@ -80,15 +80,17 @@ function Home() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 ml-64 p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
-            {mockListings.map(listing => (
-              <Link to={`/listing/${listing.id}`} key={listing.id} className="h-full">
-                <div className="h-full">
-                  <ListingCard listing={listing} />
-                </div>
-              </Link>
-            ))}
+        <div className="flex-1 pl-64">
+          <div className="p-6 max-w-[calc(100vw-16rem)]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
+              {mockListings.map(listing => (
+                <Link to={`/listing/${listing.id}`} key={listing.id} className="h-full">
+                  <div className="h-full">
+                    <ListingCard listing={listing} />
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
