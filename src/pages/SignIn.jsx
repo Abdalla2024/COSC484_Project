@@ -4,25 +4,41 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+
 //comment/
 //a
 function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Add your authentication logic here
+    const auth = getAuth();
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Signed in 
+      const user = userCredential.user;
+      // ...
+      navigate('/');
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log (errorCode,errorMessage);
+      setErrorMessage (errorMessage)
+      
+    });
 
     // For now, just navigate to home page
-    navigate('/');
+   
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
-
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md border border-gray-200">
         <div>
           <h2 className="text-left text-3xl font-extrabold text-gray-700">
@@ -71,8 +87,13 @@ function SignIn() {
               Sign in
             </button>
           </div>
+          {errorMessage ?
+            <div>
+              <p className="text-red-600">
+                {errorMessage}
+              </p>
+            </div> : null}
         </form>
-
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{' '}
