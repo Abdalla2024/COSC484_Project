@@ -9,30 +9,41 @@ import SignUp from './pages/SignUp'
 import Messages from './pages/Messages'
 import Sell from './pages/Sell'
 import Listing from './pages/Listing'
+import MyListings from './pages/MyListings'
 import './App.css'
 
 function App() {
   const location = useLocation();
-  const showNavbar = !['signin', 'signup'].includes(location.pathname.slice(1));
+  const isAuthPage = ['signin', 'signup'].includes(location.pathname.slice(1));
+
+  if (isAuthPage) {
+    return (
+      <div className="w-screen h-screen overflow-hidden">
+        <Routes>
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+        </Routes>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
-      {showNavbar && <Navbar />}
+      <Navbar />
       <div className="w-full overflow-x-auto">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/sell" element={<Sell />} />
+          <Route path="/my-listings" element={<MyListings />} />
           <Route path="/listing/:id" element={<Listing />} />
         </Routes>
       </div>
     </div>
-  )
+  );
 }
 
 export default App
