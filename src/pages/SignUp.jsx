@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import {
-  auth
-} from "../auth/firebaseconfig";
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '../auth/firebaseconfig';
+
 function SignUp() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -16,44 +15,56 @@ function SignUp() {
     setEmail(e.target.value);
     setError("");
   }
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your signup logic here
-    if (password != confirmPassword) {
-      setError("Password Do Not Match");
+    
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
       return;
     }
+
     if (!email.includes("@students.towson.edu")) {
-      setError("Email Has to Be TU School Account")
+      setError("Email must be a TU school account");
       return;
     }
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed up 
-        const user = userCredential.user;
-        console.log(user);
-        updateProfile(auth.currentUser, {
-          displayName: `${firstName} ${lastName}`
-        }).then(() => {
-          navigate('/');
-        }).catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          setError(errorMessage);
-        });
-        // ...
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        setError(errorMessage);
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      await updateProfile(user, {
+        displayName: `${firstName} ${lastName}`
       });
 
+      navigate('/');
+    } catch (error) {
+      let errorMessage = "An error occurred during sign up";
+      
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = "This email is already registered";
+          break;
+        case 'auth/invalid-email':
+          errorMessage = "Invalid email address";
+          break;
+        case 'auth/operation-not-allowed':
+          errorMessage = "Email/password accounts are not enabled";
+          break;
+        case 'auth/weak-password':
+          errorMessage = "Password is too weak";
+          break;
+        default:
+          errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
+    }
   };
 
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md mx-4 space-y-8 p-8 bg-white rounded-lg shadow-md border border-gray-200">
+       <div className="w-full max-w-md mx-4 space-y-8 p-8 bg-white rounded-lg shadow-md border border-gray-200">
         <div>
           <h2 className="text-left text-3xl font-extrabold text-gray-700">
             Create your account
@@ -146,12 +157,13 @@ function SignUp() {
               Sign up
             </button>
           </div>
-          {error ?
+          {error && (
             <div>
               <p className="text-red-600">
                 {error}
               </p>
-            </div> : null}
+            </div>
+          )}
         </form>
 
         <div className="text-center">

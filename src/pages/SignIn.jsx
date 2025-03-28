@@ -8,33 +8,53 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import Navbar from '../components/Navbar';
 //comment/
 //a
+import { auth } from '../auth/firebaseconfig';
+
 function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleEmail = (e) => {
+    setEmail(e.target.value);
+    setError("");
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your authentication logic here
-    const auth = getAuth();
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in 
-        const user = userCredential.user;
-        // ...
-        navigate('/');
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log(errorCode, errorMessage);
-        setErrorMessage(errorMessage)
 
-      });
+    if (!email.includes("@students.towson.edu")) {
+      setError("Email must be a TU school account");
+      return;
+    }
 
-    // For now, just navigate to home page
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate('/');
+    } catch (error) {
+      let errorMessage = "An error occurred during sign in";
 
+      switch (error.code) {
+        case 'auth/invalid-email':
+          errorMessage = "Invalid email address";
+          break;
+        case 'auth/user-disabled':
+          errorMessage = "This account has been disabled";
+          break;
+        case 'auth/user-not-found':
+          errorMessage = "No account found with this email";
+          break;
+        case 'auth/wrong-password':
+          errorMessage = "Incorrect password";
+          break;
+        default:
+          errorMessage = error.message;
+      }
+
+      setError(errorMessage);
+    }
   };
 
   return (
@@ -50,7 +70,7 @@ function SignIn() {
           <div className="space-y-4">
             <div className="text-left">
               <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                Email address
+                School Email
               </label>
               <input
                 id="email"
@@ -58,9 +78,9 @@ function SignIn() {
                 type="email"
                 required
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 bg-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Enter your email"
+                placeholder="Enter your school email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmail}
               />
             </div>
             <div className="text-left">
@@ -88,23 +108,25 @@ function SignIn() {
               Sign in
             </button>
           </div>
-          {errorMessage ?
+          {error && (
             <div>
               <p className="text-red-600">
-                {errorMessage}
+                {error}
               </p>
-            </div> : null}
+            </div>
+          )}
         </form>
-        <div className="text-center">
-          <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Sign up
-            </Link>
-          </p>
-        </div>
-      </div>
+
+    <div className="text-center">
+      <p className="text-sm text-gray-600">
+        Don't have an account?{' '}
+        <Link to="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+          Sign up
+        </Link>
+      </p>
     </div>
+      </div >
+    </div >
   );
 }
 
