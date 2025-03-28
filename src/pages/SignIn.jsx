@@ -5,7 +5,7 @@ import 'firebase/compat/auth';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-
+import Navbar from '../components/Navbar';
 //comment/
 //a
 function SignIn() {
@@ -18,27 +18,28 @@ function SignIn() {
     e.preventDefault();
     // Add your authentication logic here
     const auth = getAuth();
-  signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      // Signed in 
-      const user = userCredential.user;
-      // ...
-      navigate('/');
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log (errorCode,errorMessage);
-      setErrorMessage (errorMessage)
-      
-    });
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in 
+        const user = userCredential.user;
+        // ...
+        navigate('/');
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(errorCode, errorMessage);
+        setErrorMessage(errorMessage)
+
+      });
 
     // For now, just navigate to home page
-   
+
   };
 
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+      <Navbar />
       <div className="w-full max-w-md mx-4 space-y-8 p-8 bg-white rounded-lg shadow-md border border-gray-200">
         <div>
           <h2 className="text-left text-3xl font-extrabold text-gray-700">
