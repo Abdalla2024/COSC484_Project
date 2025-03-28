@@ -1,6 +1,13 @@
+// Import FirebaseAuth and firebase.
+import React from 'react';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import Navbar from '../components/Navbar';
+//comment/
+//a
 import { auth } from '../auth/firebaseconfig';
 
 function SignIn() {
@@ -8,6 +15,7 @@ function SignIn() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleEmail = (e) => {
     setEmail(e.target.value);
@@ -27,7 +35,7 @@ function SignIn() {
       navigate('/');
     } catch (error) {
       let errorMessage = "An error occurred during sign in";
-      
+
       switch (error.code) {
         case 'auth/invalid-email':
           errorMessage = "Invalid email address";
@@ -44,14 +52,15 @@ function SignIn() {
         default:
           errorMessage = error.message;
       }
-      
+
       setError(errorMessage);
     }
   };
 
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-       <div className="w-full max-w-md mx-4 space-y-8 p-8 bg-white rounded-lg shadow-md border border-gray-200">
+      <Navbar />
+      <div className="w-full max-w-md mx-4 space-y-8 p-8 bg-white rounded-lg shadow-md border border-gray-200">
         <div>
           <h2 className="text-left text-3xl font-extrabold text-gray-700">
             Sign in to your account
@@ -108,16 +117,16 @@ function SignIn() {
           )}
         </form>
 
-        <div className="text-center">
-          <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Sign up
-            </Link>
-          </p>
-        </div>
-      </div>
+    <div className="text-center">
+      <p className="text-sm text-gray-600">
+        Don't have an account?{' '}
+        <Link to="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+          Sign up
+        </Link>
+      </p>
     </div>
+      </div >
+    </div >
   );
 }
 

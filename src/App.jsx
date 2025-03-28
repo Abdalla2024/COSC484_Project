@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import ProductList from './pages/ProductList'
@@ -11,11 +11,12 @@ import Sell from './pages/Sell'
 import Listing from './pages/Listing'
 import MyListings from './pages/MyListings'
 import './App.css'
+import { useAuth } from './auth/Auth'
 
 function App() {
   const location = useLocation();
   const isAuthPage = ['signin', 'signup'].includes(location.pathname.slice(1));
-
+  const auth = useAuth()
   if (isAuthPage) {
     return (
       <div className="w-screen h-screen overflow-hidden">
@@ -26,7 +27,7 @@ function App() {
       </div>
     );
   }
-
+  if (!auth.token) return <Navigate to='/signin' />;
   return (
     <div className="min-h-screen bg-white">
       <Navbar />

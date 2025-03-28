@@ -11,7 +11,6 @@ function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
   const handleEmail = (e) => {
     setEmail(e.target.value);
     setError("");
