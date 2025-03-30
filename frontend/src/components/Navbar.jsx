@@ -61,7 +61,7 @@ function Navbar() {
           {/* Desktop Navigation - Hidden on mobile */}
           <div className="hidden md:flex items-center gap-8">
             <Link 
-              to="/messages" 
+              to="/chats" 
               className="text-gray-600 hover:text-yellow-500 transition-colors"
             >
               <FaCommentAlt className="w-8 h-8" />
