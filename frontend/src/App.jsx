@@ -21,6 +21,7 @@ import VerifyPage from './pages/VerifyPage';
 import VerifyComplete from './pages/VerifyComplete';
 
 
+
 function App() {
   const location = useLocation();
   const isAuthPage = ['signin', 'signup', 'verify-pending'].includes(location.pathname.slice(1));
