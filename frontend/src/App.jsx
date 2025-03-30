@@ -18,6 +18,7 @@ import Reviews from './pages/Reviews'
 import OrderConfirmation from './pages/OrderConfirmation'
 import './App.css'
 
+
 function App() {
   const location = useLocation();
   const isAuthPage = ['signin', 'signup'].includes(location.pathname.slice(1));
