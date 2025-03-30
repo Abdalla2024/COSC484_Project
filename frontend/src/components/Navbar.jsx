@@ -56,6 +56,8 @@ function Navbar() {
             </h1>
           </div>
 
+
+
           {/* Desktop Navigation - Hidden on mobile */}
           <div className="hidden md:flex items-center gap-8">
             <Link 
@@ -127,7 +129,7 @@ function Navbar() {
           <div className="md:hidden bg-white border-t border-gray-200">
             <div className="px-2 pt-2 pb-3 space-y-1">
               <Link
-                to="/messages"
+                to="/chats"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-yellow-500 hover:bg-gray-50"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
