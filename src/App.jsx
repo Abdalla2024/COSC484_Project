@@ -10,7 +10,9 @@ import Messages from './pages/Messages'
 import Sell from './pages/Sell'
 import Listing from './pages/Listing'
 import MyListings from './pages/MyListings'
+import Chats from './pages/Chats'
 import './App.css'
+
 
 function App() {
   const location = useLocation();
@@ -36,10 +38,11 @@ function App() {
           <Route path="/products" element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/messages" element={<Messages />} />
           <Route path="/sell" element={<Sell />} />
           <Route path="/my-listings" element={<MyListings />} />
           <Route path="/listing/:id" element={<Listing />} />
+          <Route path="/chats" element={<Chats />} />
+          <Route path="/messages/:chatId" element={<Messages />} />
         </Routes>
       </div>
     </div>
