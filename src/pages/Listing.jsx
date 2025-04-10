@@ -66,6 +66,10 @@ function Listing() {
     setIsZoomed(!isZoomed);
   };
 
+  const handleBuyNow = () => {
+    navigate(`/checkout/${id}`);
+  };
+
   return (
     <div className="min-h-screen pt-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
@@ -164,7 +168,8 @@ function Listing() {
 
             {/* Action Buttons */}
             <div className="space-y-4">
-              <button
+              <button 
+                onClick={handleBuyNow}
                 className="w-full bg-[#FFB800] text-black py-3 px-4 rounded-md hover:bg-[#FFB800]/90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFB800] flex items-center justify-center"
               >
                 Buy Now
