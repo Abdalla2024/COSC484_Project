@@ -13,6 +13,28 @@ function Sell() {
     images: []
   });
 
+  const [images, setImages] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  const [error, setError] = useState('');
+  const [condition, setCondition] = useState('');
+  const [deliveryMethod, setDeliveryMethod] = useState('');
+  const [meetupLocation, setMeetupLocation] = useState('');
+  const [showLocationInput, setShowLocationInput] = useState(false);
+
+  const conditions = [
+    { value: 'new', label: 'New' },
+    { value: 'like_new', label: 'Like New' },
+    { value: 'good', label: 'Good' },
+    { value: 'fair', label: 'Fair' },
+    { value: 'poor', label: 'Poor' }
+  ];
+
+  const deliveryOptions = [
+    { value: 'Delivery', label: 'Devlivery Only' },
+    { value: 'meetup', label: 'Meetup Only' },
+    { value: 'both', label: 'Shipping or Meetup' }
+  ];
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProductData(prev => ({
@@ -29,8 +51,30 @@ function Sell() {
     }));
   };
 
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    
+    // Create preview URLs
+    const newPreviewUrls = files.map(file => URL.createObjectURL(file));
+    setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+    
+    // Store the actual files
+    setImages(prev => [...prev, ...files]);
+    setError(''); // Clear any previous errors
+  };
+
+  const removeImage = (index) => {
+    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+    setImages(prev => prev.filter((_, i) => i !== index));
+    setError(''); // Clear any previous errors
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (images.length < 3) {
+      setError('Please upload at least 3 photos of your item');
+      return;
+    }
     console.log(productData);
     // Add your submission logic here
   };
@@ -80,6 +124,74 @@ function Sell() {
                 required
                 placeholder="Enter the title of your item"
               />
+            </div>
+
+            {/* Condition Selector */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Condition
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {conditions.map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setCondition(item.value)}
+                    className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
+                      condition === item.value
+                        ? 'border-[#FFBB00] bg-[#FFBB00] text-black'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Delivery Method */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Delivery Method
+              </label>
+              <div className="space-y-2">
+                {deliveryOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      setDeliveryMethod(option.value);
+                      setShowLocationInput(option.value === 'meetup' || option.value === 'both');
+                    }}
+                    className={`w-full p-3 border rounded-lg text-sm font-medium transition-colors ${
+                      deliveryMethod === option.value
+                        ? 'border-[#FFBB00] bg-[#FFBB00] text-black'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Meetup Location Input */}
+              {showLocationInput && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Meetup Location
+                  </label>
+                  <input
+                    type="text"
+                    value={meetupLocation}
+                    onChange={(e) => setMeetupLocation(e.target.value)}
+                    placeholder="Enter meetup location (e.g., Starbucks on Main St)"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-black placeholder-gray-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Be specific about the meetup location for potential buyers
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Description */}
@@ -144,11 +256,84 @@ function Sell() {
               />
             </div>
 
+            {/* Image Upload Section */}
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-4">Upload Photos</h2>
+              <p className="text-sm text-gray-500 mb-4">
+                Add at least 3 photos of your item. You can upload up to 5 photos.
+              </p>
+
+              {error && (
+                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+                  {error}
+                </div>
+              )}
+
+              {/* Image Preview Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+                {previewUrls.map((url, index) => (
+                  <div key={index} className="relative aspect-square">
+                    <img 
+                      src={url} 
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                    <button
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+
+                {/* Upload Button */}
+                {previewUrls.length < 5 && (
+                  <label className="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-gray-400">
+                    <div className="text-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      <span className="text-sm text-gray-500">Add Photo</span>
+                    </div>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                    />
+                  </label>
+                )}
+              </div>
+
+              {/* Photo Count Indicator */}
+              <div className="text-sm text-gray-500">
+                {previewUrls.length} of 5 photos uploaded
+                {previewUrls.length < 3 && (
+                  <span className="text-red-500 ml-2">(Minimum 3 required)</span>
+                )}
+              </div>
+            </div>
+
             {/* Submit Button */}
             <div className="pt-4">
-              <button
+              <button 
                 type="submit"
-                className="w-full bg-[#FFB800] text-white py-2 px-4 rounded-md hover:bg-[#E5A600] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFB800]"
+                className={`w-full py-3 px-6 rounded-lg ${
+                  previewUrls.length < 3 || !condition || !deliveryMethod || 
+                  (showLocationInput && !meetupLocation)
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-[#FFBB00] hover:bg-[#FFBB00]/90 text-black'
+                }`}
+                disabled={
+                  previewUrls.length < 3 || 
+                  !condition || 
+                  !deliveryMethod || 
+                  (showLocationInput && !meetupLocation)
+                }
               >
                 List Item
               </button>
