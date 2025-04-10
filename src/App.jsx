@@ -11,6 +11,8 @@ import Sell from './pages/Sell'
 import Listing from './pages/Listing'
 import MyListings from './pages/MyListings'
 import AccountSettings from './pages/AccountSettings'
+import Checkout from './pages/Checkout'
+import Orders from './pages/Orders'
 import './App.css'
 
 function App() {
@@ -42,6 +44,9 @@ function App() {
           <Route path="/my-listings" element={<MyListings />} />
           <Route path="/listing/:id" element={<Listing />} />
           <Route path="/account-settings" element={<AccountSettings />} />
+          <Route path="/checkout/:listingId" element={<Checkout />} />
+          <Route path="/my-orders" element={<Orders />} />
+          <Route path="/orders/:orderId" element={<Orders />} />
         </Routes>
       </div>
     </div>

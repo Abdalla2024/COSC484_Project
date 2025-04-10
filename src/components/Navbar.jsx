@@ -76,24 +76,28 @@ function Navbar() {
 
               {/* Dropdown Menu */}
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
                   <Link
                     to="/my-listings"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-center"
-                    onClick={() => setIsDropdownOpen(false)}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     My Listings
                   </Link>
                   <Link
+                    to="/my-orders"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    My Orders
+                  </Link>
+                  <Link
                     to="/account-settings"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-center"
-                    onClick={() => setIsDropdownOpen(false)}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     Account Settings
                   </Link>
                   <button
                     onClick={handleSignOut}
-                    className="block w-full px-4 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-gray-100 transition-colors text-center"
+                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                   >
                     Sign Out
                   </button>
