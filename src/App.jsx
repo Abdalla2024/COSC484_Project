@@ -10,6 +10,8 @@ import Messages from './pages/Messages'
 import Sell from './pages/Sell'
 import Listing from './pages/Listing'
 import MyListings from './pages/MyListings'
+import Success from './pages/Success'
+import Cancel from './pages/Cancel'
 import './App.css'
 
 function App() {
@@ -40,6 +42,8 @@ function App() {
           <Route path="/sell" element={<Sell />} />
           <Route path="/my-listings" element={<MyListings />} />
           <Route path="/listing/:id" element={<Listing />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/cancel" element={<Cancel />} />
         </Routes>
       </div>
     </div>

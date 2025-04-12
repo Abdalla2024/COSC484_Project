@@ -1,20 +1,55 @@
 import { useParams } from 'react-router-dom';
 import ListingCard from '../components/ListingCard';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe("pk_test_51R7L8iPKPGdvnNX7Q1z1VK2EszKUwsdiXL7fJedYyshWpvCeQy5cRkxUP9zoTM7BgzA5cWFEWsf9jmUF0VVe2E1H00vqWJfDGE");
 
 function Listing() {
   const { id } = useParams();
 
+  async function handleBuy() {
+    console.log("Buy button clicked 🚀");
+  
+    try {
+      const response = await fetch("http://localhost:4242/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          id: mockListing.id,
+          title: mockListing.title,
+          price: mockListing.price
+        })
+      });
+  
+      const data = await response.json();
+      console.log("Stripe session response:", data);
+  
+      const stripe = await stripePromise;
+      const result = await stripe.redirectToCheckout({ sessionId: data.id });
+  
+      if (result.error) {
+        console.error(result.error.message);
+      }
+    } catch (error) {
+      console.error("Error during checkout:", error);
+    }
+  }
+  
+  
+
   // This would normally come from your backend
   const mockListing = {
-    id: id,
-    title: "Computer Science Textbook",
-    description: "Latest edition, barely used. Perfect condition with no markings or highlights. Includes online access code that hasn't been used. Great for CS101 and CS102 courses.",
-    price: 75.00,
-    status: "active",
-    imageUrl: `https://picsum.photos/seed/${id}/800/600`,
-    date: "2024-03-15",
-    offers: 2
-  };
+      id: id,
+      title: "Computer Science Textbook",
+      description: "Latest edition, barely used. Perfect condition with no markings or highlights. Includes online access code that hasn't been used. Great for CS101 and CS102 courses.",
+      price: 75.00,
+      status: "active",
+      imageUrl: `https://picsum.photos/seed/${id}/800/600`,
+      date: "2024-03-15",
+      offers: 2
+    };
 
   return (
     <div className="min-h-screen pt-24 px-4 sm:px-6 lg:px-8">
@@ -60,7 +95,7 @@ function Listing() {
 
             {/* Contact Seller Button */}
             <button
-              className="w-full bg-[#FFB800] text-white py-3 px-4 rounded-md hover:bg-[#E5A600] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFB800]"
+              className="w-full bg-white text-[#FFB800] border-2 border-[#FFB800] py-3 px-4 rounded-md hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFB800]"
             >
               Contact Seller
             </button>
@@ -70,6 +105,14 @@ function Listing() {
               className="w-full bg-white text-[#FFB800] border-2 border-[#FFB800] py-3 px-4 rounded-md hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFB800]"
             >
               Make Offer
+            </button>
+
+            {/* Buy Button */}
+            <button
+              onClick={handleBuy}
+              className="w-full bg-[#FFB800] text-white py-3 px-4 rounded-md hover:bg-[#E5A600] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFB800]"
+            >
+              Buy
             </button>
           </div>
         </div>
