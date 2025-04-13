@@ -16,7 +16,6 @@ function Navbar() {
   };
 
   const handleSignOut = () => {
-    // Add any logout logic here (clearing tokens, etc)
     setIsDropdownOpen(false);
     setIsMobileMenuOpen(false);
     navigate('/signin');
