@@ -14,6 +14,20 @@ function Messages() {
   const [conversations, setConversations] = useState([]);
   const [unreadCounts, setUnreadCounts] = useState({});
 
+  const formatTimeAgo = (timestamp) => {
+    const now = new Date();
+    const messageTime = new Date(timestamp);
+    const diffInHours = Math.floor((now - messageTime) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) {
+      return 'just now';
+    } else if (diffInHours < 24) {
+      return `${diffInHours}h ago`;
+    } else {
+      return `${Math.floor(diffInHours / 24)}d ago`;
+    }
+  };
+
   useEffect(() => {
     if (!loading && !user) {
       console.log('No user found, redirecting to sign in...');
@@ -96,7 +110,8 @@ function Messages() {
             firebaseId: userId,
             displayName: userData.displayName || 'Unknown User',
             email: userData.email || '',
-            photoURL: userData.photoURL || ''
+            photoURL: userData.photoURL || '',
+            lastMessage: allMessages.find(m => m.senderId === userId || m.receiverId === userId)
           });
           counts[userId] = count;
         } catch (error) {
@@ -106,7 +121,8 @@ function Messages() {
             firebaseId: userId,
             displayName: 'Unknown User',
             email: '',
-            photoURL: ''
+            photoURL: '',
+            lastMessage: null
           });
           counts[userId] = 0;
         }
@@ -173,6 +189,11 @@ function Messages() {
     }
   };
 
+  const handleSelectUser = (user) => {
+    setSelectedUser(user);
+    fetchMessages();
+  };
+
   useEffect(() => {
     if (selectedUser) {
       fetchMessages();
@@ -188,25 +209,48 @@ function Messages() {
       {/* Conversations List */}
       <div className="w-1/4 border-r border-gray-200 bg-white">
         <div className="p-4 pt-6">
-          <h2 className="text-xl font-bold mb-4 text-gray-800">Conversations</h2>
-          <div className="space-y-2 max-h-[calc(100vh-12rem)] overflow-y-auto">
-            {conversations.map((otherUser) => (
+          <h2 className="text-xl font-bold text-center mb-4 text-black">Conversations</h2>
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Search conversations..."
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="space-y-2">
+            {conversations.map((convo) => (
               <div
-                key={otherUser.firebaseId}
-                className={`p-3 rounded-lg cursor-pointer ${
-                  selectedUser?.firebaseId === otherUser.firebaseId 
-                    ? 'bg-blue-100 text-gray-800' 
-                    : 'bg-white text-gray-800 hover:bg-gray-100'
+                key={convo.firebaseId}
+                className={`p-3 rounded-lg cursor-pointer hover:bg-gray-100 ${
+                  selectedUser?.firebaseId === convo.firebaseId ? 'bg-gray-100' : ''
                 }`}
-                onClick={() => setSelectedUser(otherUser)}
+                onClick={() => handleSelectUser(convo)}
               >
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">{otherUser.displayName}</span>
-                  {unreadCounts[otherUser.firebaseId] > 0 && (
-                    <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1">
-                      {unreadCounts[otherUser.firebaseId]}
-                    </span>
+                <div className="flex items-center space-x-3">
+                  {convo.photoURL ? (
+                    <img
+                      src={convo.photoURL}
+                      alt={convo.displayName}
+                      className="w-12 h-12 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-500 text-lg">
+                        {convo.displayName.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
                   )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-semibold truncate text-black">{convo.displayName}</h3>
+                      <span className="text-xs text-gray-500">
+                        {convo.lastMessage ? formatTimeAgo(convo.lastMessage.timestamp) : ''}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 truncate">
+                      {convo.lastMessage ? convo.lastMessage.content : 'No messages yet'}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
