@@ -15,6 +15,7 @@ import Checkout from './pages/Checkout'
 import Orders from './pages/Orders'
 import Dispute from './pages/Dispute'
 import Reviews from './pages/Reviews'
+import OrderConfirmation from './pages/OrderConfirmation'
 import './App.css'
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
           <Route path="/orders/:orderId" element={<Orders />} />
           <Route path="/disputes/:orderId" element={<Dispute />} />
           <Route path="/reviews/:sellerId" element={<Reviews />} />
+          <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
         </Routes>
       </div>
     </div>
