@@ -22,7 +22,7 @@ function Checkout() {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      navigate('/success');
+      navigate(`/order-confirmation/${listingId}`);
     }, 2000);
   };
 
