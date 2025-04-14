@@ -34,9 +34,9 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white w-full overflow-x-hidden">
       <Navbar />
-      <div className="w-full overflow-x-auto">
+      <div className="w-full">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductList />} />
@@ -59,4 +59,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
