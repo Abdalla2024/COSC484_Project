@@ -46,17 +46,17 @@ function AccountSettings() {
         {/* Account Information */}
         <div className="space-y-4">
           <div className="border-b pb-4 text-center">
-            <h2 className="text-lg font-semibold mb-2">Email</h2>
+            <h2 className="text-lg font-semibold mb-2 text-black">Email</h2>
             <p className="text-gray-600">{user?.email}</p>
           </div>
           
           <div className="border-b pb-4 text-center">
-            <h2 className="text-lg font-semibold mb-2">User ID</h2>
+            <h2 className="text-lg font-semibold mb-2 text-black">User ID</h2>
             <p className="text-gray-600 break-all">{user?.uid}</p>
           </div>
           
           <div className="border-b pb-4 text-center">
-            <h2 className="text-lg font-semibold mb-2">Display Name</h2>
+            <h2 className="text-lg font-semibold mb-2 text-black">Display Name</h2>
             <p className="text-gray-600">{user?.displayName || 'Not set'}</p>
           </div>
         </div>
