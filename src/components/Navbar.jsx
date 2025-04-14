@@ -1,11 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { FaCommentAlt, FaPlus, FaUserCircle, FaBars } from 'react-icons/fa'
 import { useState } from 'react'
+import { useAuthState } from 'react-firebase-hooks/auth'
+import { auth } from '../auth/firebaseconfig'
 
 function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const [user] = useAuthState(auth);
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -19,6 +22,11 @@ function Navbar() {
     setIsDropdownOpen(false);
     setIsMobileMenuOpen(false);
     navigate('/signin');
+  };
+
+  const getUserInitials = () => {
+    if (!user?.displayName) return 'U';
+    return user.displayName.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
   return (

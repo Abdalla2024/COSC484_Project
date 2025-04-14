@@ -236,7 +236,7 @@ function Messages() {
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
                       <span className="text-gray-500 text-lg">
-                        {convo.displayName.charAt(0).toUpperCase()}
+                        {convo.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
                       </span>
                     </div>
                   )}
@@ -274,13 +274,12 @@ function Messages() {
                 ) : (
                   <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
                     <span className="text-gray-500 text-2xl">
-                      {selectedUser.displayName.charAt(0).toUpperCase()}
+                      {selectedUser.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
                     </span>
                   </div>
                 )}
-                <div className="text-center -mt-5">
-                  <h2 className="text-lg font-semibold">{selectedUser.displayName}</h2>
-                  <p className="text-sm text-gray-500">{selectedUser.email}</p>
+                <div className="text-center mt-2">
+                  <h2 className="text-lg font-semibold text-black">{selectedUser.displayName}</h2>
                 </div>
               </div>
             </div>
