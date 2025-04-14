@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import ListingCard from '../components/ListingCard';
 import { formatDistanceToNow } from 'date-fns';
 import AccountPFP from '../components/AccountPFP';
@@ -192,16 +192,13 @@ function Listing() {
                     <AccountPFP user={mockUser} />
                   </div>
                   <div className="flex items-center space-x-2 ml-4">
-                    <button
-                      onClick={handleReviewsClick}
-                      className="flex items-center space-x-2 text-sm text-[#FFB800] hover:text-[#FFB800]/80 bg-white px-4 py-2 rounded-full border border-[#FFB800] hover:bg-[#FFB800]/10 transition-all"
+                    <Link
+                      to={`/reviews/${mockUser.id}`}
+                      className="inline-flex items-center gap-1 text-[#FFB800] hover:text-[#FFB800]/80"
                     >
-                      <span className="font-medium">⭐ {mockUser.rating}</span>
-                      <span className="underline">See Reviews</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </button>
+                      <span>4.8</span>
+                      <span>See Reviews →</span>
+                    </Link>
                   </div>
                 </div>
               </div>

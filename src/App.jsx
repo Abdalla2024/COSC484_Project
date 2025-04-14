@@ -13,6 +13,8 @@ import MyListings from './pages/MyListings'
 import AccountSettings from './pages/AccountSettings'
 import Checkout from './pages/Checkout'
 import Orders from './pages/Orders'
+import Dispute from './pages/Dispute'
+import Reviews from './pages/Reviews'
 import './App.css'
 
 function App() {
@@ -47,6 +49,8 @@ function App() {
           <Route path="/checkout/:listingId" element={<Checkout />} />
           <Route path="/my-orders" element={<Orders />} />
           <Route path="/orders/:orderId" element={<Orders />} />
+          <Route path="/disputes/:orderId" element={<Dispute />} />
+          <Route path="/reviews/:sellerId" element={<Reviews />} />
         </Routes>
       </div>
     </div>

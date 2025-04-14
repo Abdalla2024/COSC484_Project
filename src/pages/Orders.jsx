@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 
 function Orders() {
   const { orderId } = useParams();
   const [isConfirmingDelivery, setIsConfirmingDelivery] = useState(false);
+  const navigate = useNavigate();
 
   // Mock orders data - in real app, this would come from an API for the logged-in buyer
   const mockOrders = [
@@ -96,7 +97,7 @@ function Orders() {
                   
                   {/* View Details Button */}
                   <Link 
-                    to={`/listing/${order.listing.id}`}
+                    to={`/order-confirmation/${order.id}`}
                     className="inline-block mt-3 text-[#FFB800] hover:text-[#FFB800]/80 font-medium"
                   >
                     View Details →
@@ -132,7 +133,7 @@ function Orders() {
                     {isConfirmingDelivery ? 'Confirming...' : 'Confirm Delivery'}
                   </button>
                   <button
-                    onClick={() => handleReportIssue(order.id)}
+                    onClick={() => navigate(`/disputes/${order.id}`)}
                     className="flex-1 bg-white text-red-600 border border-red-600 py-3 px-6 rounded-lg hover:bg-red-50 transition-colors"
                   >
                     Report Issue
