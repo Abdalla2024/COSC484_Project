@@ -109,6 +109,27 @@ const orderSchema = new mongoose.Schema({
   notes: { type: String }   
 }, { timestamps: true });
 
+//transaction schema
+const transactionSchema = new mongoose.Schema({
+  orderId: { type: Schema.Types.ObjectId, ref: 'Order' },
+  buyerId: { type: Schema.Types.ObjectId, ref: 'User' },
+  paymentMethod: { type: String, enum: ['escrow', 'direct'], required: true },
+  amount: { type: Number, required: true },
+  status: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' },
+  refundedAt: { type: Date } ,
+  refundAmount: { type: Number },
+  releasedAt: { type: Date },
+  createdAt: { type: Date, default: Date.now }
+});
+//bid schema
+const bidSchema = new mongoose.Schema({
+  listingId: { type: Schema.Types.ObjectId, ref: 'Listing' },
+  bidderId: { type: Schema.Types.ObjectId, ref: 'User' },
+  amount: { type: Number, required: true },
+  acceptedAt: { type: Date },
+  accepted: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now }
+});
 // Review Schema
 const reviewSchema = new mongoose.Schema({
   orderId: { 
@@ -140,10 +161,14 @@ const User = mongoose.model('User', userSchema);
 const Listing = mongoose.model('Listing', listingSchema);
 const Order = mongoose.model('Order', orderSchema);
 const Review = mongoose.model('Review', reviewSchema);
+const Transaction = mongoose.model('Transaction', transactionSchema);
+const Bid = mongoose.model('Bid', bidSchema);
 
 module.exports = {
   User,
   Listing,
   Order,
-  Review
+  Review,
+  Transaction,
+  Bid
 };
