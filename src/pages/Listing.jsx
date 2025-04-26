@@ -32,11 +32,11 @@ function Listing() {
     meetupLocation: "Starbucks on Main St"
   };
 
-  // Mock seller data for testing
-  const seller = {
-    _id: 'user123',
-    username: 'JohnDoe',
-    profileImage: 'https://via.placeholder.com/100',
+  const mockUser = {
+    id: "user123",
+    username: "JohnDoe",
+    profilePicture: "https://via.placeholder.com/40",
+    isOnline: true,
     rating: 4.8
   };
 
@@ -59,7 +59,7 @@ function Listing() {
   };
 
   const handleReviewsClick = () => {
-    navigate(`/account-reviews/${seller._id}`);
+    navigate(`/account-reviews/${mockUser.id}`);
   };
 
   const handleImageClick = () => {
@@ -69,14 +69,6 @@ function Listing() {
   const handleBuyNow = () => {
     navigate(`/checkout/${id}`);
   };
-
-  const handleSellerClick = () => {
-    console.log('Seller clicked, navigating to:', `/profile/${seller._id}`); // Debug log
-    navigate(`/profile/${seller._id}`);
-  };
-
-  // Default profile picture URL
-  const defaultPfp = "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png";
 
   return (
     <div className="min-h-screen pt-16 px-4 sm:px-6 lg:px-8">
@@ -193,32 +185,21 @@ function Listing() {
                 Message Seller
               </button>
 
-              {/* Seller Info Section */}
-              <div className="flex flex-col items-start gap-2 mb-6">
-                <div 
-                  onClick={() => navigate(`/profile/${seller._id}`)}
-                  className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 p-1 rounded-lg transition-colors"
-                >
-                  <div className="relative">
-                    <img
-                      src={seller.profileImage || "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"}
-                      alt={seller.username}
-                      className="w-12 h-12 rounded-full object-cover"
-                      onError={(e) => {
-                        e.target.src = "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png";
-                      }}
-                    />
-                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
+              {/* Seller Profile Section */}
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <AccountPFP user={mockUser} />
                   </div>
-                  
-                  <span className="text-xl font-medium text-black">{seller.username || 'Unknown User'}</span>
-                </div>
-
-                <div 
-                  onClick={() => navigate(`/reviews/${seller._id}`)}
-                  className="text-blue-600 hover:underline cursor-pointer"
-                >
-                  See Reviews →
+                  <div className="flex items-center space-x-2 ml-4">
+                    <Link
+                      to={`/reviews/${mockUser.id}`}
+                      className="inline-flex items-center gap-1 text-[#FFB800] hover:text-[#FFB800]/80"
+                    >
+                      <span>4.8</span>
+                      <span>See Reviews →</span>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
