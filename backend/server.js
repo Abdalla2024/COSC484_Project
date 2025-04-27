@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { MongoClient } from 'mongodb';
+import { seedDatabase } from './seedData.js';
 
 dotenv.config();
 
@@ -12,7 +13,11 @@ const DB_NAME = 'cosc484project';
 
 // CORS configuration
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: [
+    'http://localhost:5173',
+    'https://cosc-484-project.vercel.app',
+    'https://cosc-484-project-api.vercel.app'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
   credentials: true,
@@ -193,6 +198,26 @@ app.get('/api/messages/unread/:userId/:otherUserId', async (req, res) => {
     console.error('Error counting unread messages:', error);
     res.status(500).json({ error: error.message });
   }
+});
+
+// Add seed endpoint
+app.post('/api/seed', async (req, res) => {
+  console.log('Received seed request');
+  try {
+    console.log('Seeding database...');
+    await seedDatabase();
+    console.log('Database seeded successfully');
+    res.status(200).json({ message: 'Database seeded successfully' });
+  } catch (error) {
+    console.error('Error seeding database:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add a test endpoint to verify the server is working
+app.get('/api/test', (req, res) => {
+  console.log('Test endpoint hit');
+  res.json({ message: 'API is working' });
 });
 
 // Connect to MongoDB and start server

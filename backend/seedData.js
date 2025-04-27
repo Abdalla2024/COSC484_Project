@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb';
 
-const MONGODB_URI = 'mongodb://localhost:27017';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const DB_NAME = 'cosc484project';
 
 const dummyUsers = [
@@ -86,7 +86,7 @@ const dummyMessages = [
   }
 ];
 
-async function seedDatabase() {
+export async function seedDatabase() {
   const client = new MongoClient(MONGODB_URI);
   try {
     await client.connect();
@@ -110,6 +110,4 @@ async function seedDatabase() {
   } finally {
     await client.close();
   }
-}
-
-seedDatabase(); 
+} 
