@@ -206,8 +206,44 @@ app.post('/api/seed', async (req, res) => {
   try {
     console.log('Seeding database...');
     await seedDatabase();
-    console.log('Database seeded successfully');
-    res.status(200).json({ message: 'Database seeded successfully' });
+    
+    // Verify the data was inserted
+    const users = await db.collection('users').find().toArray();
+    const messages = await db.collection('messages').find().toArray();
+    
+    console.log('Users after seeding:', users);
+    console.log('Messages after seeding:', messages);
+    
+    res.status(200).json({ 
+      message: 'Database seeded successfully',
+      usersCount: users.length,
+      messagesCount: messages.length
+    });
+  } catch (error) {
+    console.error('Error seeding database:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add a temporary GET endpoint for seeding (remove this in production)
+app.get('/api/seed-db', async (req, res) => {
+  console.log('Received seed request via GET');
+  try {
+    console.log('Seeding database...');
+    await seedDatabase();
+    
+    // Verify the data was inserted
+    const users = await db.collection('users').find().toArray();
+    const messages = await db.collection('messages').find().toArray();
+    
+    console.log('Users after seeding:', users);
+    console.log('Messages after seeding:', messages);
+    
+    res.status(200).json({ 
+      message: 'Database seeded successfully',
+      usersCount: users.length,
+      messagesCount: messages.length
+    });
   } catch (error) {
     console.error('Error seeding database:', error);
     res.status(500).json({ error: error.message });

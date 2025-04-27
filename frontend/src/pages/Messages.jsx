@@ -3,7 +3,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../auth/firebaseconfig';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://cosc-484-project-api.vercel.app/api';
 
 function Messages() {
   const [user, loading] = useAuthState(auth);
@@ -67,13 +67,13 @@ function Messages() {
 
   const fetchConversations = async () => {
     try {
-      console.log('Fetching conversations...');
+      console.log('Fetching conversations for user:', user.uid);
       // Get all messages for the current user
       const messagesResponse = await fetch(`${API_URL}/messages/user/${user.uid}`, {
         credentials: 'include'
       });
       const allMessages = await messagesResponse.json();
-      console.log('All messages:', allMessages);
+      console.log('All messages response:', allMessages);
       
       // Get unique user IDs from messages
       const uniqueUserIds = new Set();
@@ -84,7 +84,7 @@ function Messages() {
           uniqueUserIds.add(message.senderId);
         }
       });
-      console.log('Unique user IDs:', Array.from(uniqueUserIds));
+      console.log('Unique user IDs found:', Array.from(uniqueUserIds));
       
       // Get user details for each unique ID
       const conversations = [];
