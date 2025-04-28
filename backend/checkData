@@ -1,130 +1,0 @@
-Script started on Mon Apr 14 13:42:54 2025
-[1m[7m%[27m[1m[0m                                                                                     ]2;rasheednolley@Rasheeds-MacBook-Air-2:~/Documents/COSC484_Project]1;..SC484_Project]7;file://Rasheeds-MacBook-Air-2.local/Users/rasheednolley/Documents/COSC484_Project\[0m[27m[24m[J[01;32m➜  [36mCOSC484_Project[00m [K[?1h=[?2004h[0m[27m[24m[J[01;32m➜  [36mCOSC484_Project[00m [01;34mgit:([31mdev[34m) [33m✗[00m [Kscript checkData[9DseedData [15Dnpm run dev    [?1l>[?2004l
-]2;npm run dev]1;npm
-> my-app@0.0.0 dev
-> vite
-
-[1G[0K
-
-
-
-
-
-
-
-
-
-
-
-
-[1;1H[0J
-  [32m[1mVITE[22m v5.4.18[39m  [2mready in [0m[1m137[22m[2m[0m ms[22m
-
-  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
-[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
-[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
-
-
-
-
-
-
-
-
-
-
-
-
-
-[1;1H[0J[2m2:32:59 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css, /src/App.css[22m
-
-
-
-
-
-
-
-
-
-
-
-
-
-[1;1H[0J[2m11:28:30 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css, /src/App.css[22m [33m(x2)[39m
-
-
-
-
-
-
-
-
-
-
-
-
-
-[1;1H[0J[2m11:28:36 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/Navbar.jsx, /src/index.css, /src/App.css[22m
-
-
-
-
-
-
-
-
-
-
-
-
-
-[1;1H[0J[2m11:30:42 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Listing.jsx, /src/index.css, /src/App.css[22m
-^[[A^[[Aq
-q
-[1G[0K⠙[1G[0K[1m[7m%[27m[1m[0m                                                                                     ]2;rasheednolley@Rasheeds-MacBook-Air-2:~/Documents/COSC484_Project]1;..SC484_Project]7;file://Rasheeds-MacBook-Air-2.local/Users/rasheednolley/Documents/COSC484_Project\[0m[27m[24m[J[01;32m➜  [36mCOSC484_Project[00m [01;34mgit:([31mdev[34m) [33m✗[00m [K[?1h=[?2004hg ggit pull origin dev[?1l>[?2004l
-]2;git pull origin dev]1;gitFrom github.com:Abdalla2024/COSC484_Project
- * branch            dev        -> FETCH_HEAD
-Already up to date.
-[1m[7m%[27m[1m[0m                                                                                     ]2;rasheednolley@Rasheeds-MacBook-Air-2:~/Documents/COSC484_Project]1;..SC484_Project]7;file://Rasheeds-MacBook-Air-2.local/Users/rasheednolley/Documents/COSC484_Project\[0m[27m[24m[J[01;32m➜  [36mCOSC484_Project[00m [01;34mgit:([31mdev[34m) [33m✗[00m [K[?1h=[?2004h[7mgit fetch origin[27m[16D[27mg[27mi[27mt[27m [27mf[27me[27mt[27mc[27mh[27m [27mo[27mr[27mi[27mg[27mi[27mn[?1l>[?2004l
-]2;git fetch origin]1;git[1m[7m%[27m[1m[0m                                                                                     ]2;rasheednolley@Rasheeds-MacBook-Air-2:~/Documents/COSC484_Project]1;..SC484_Project]7;file://Rasheeds-MacBook-Air-2.local/Users/rasheednolley/Documents/COSC484_Project\[0m[27m[24m[J[01;32m➜  [36mCOSC484_Project[00m [01;34mgit:([31mdev[34m) [33m✗[00m [K[?1h=[?2004h[7mgit reset --hard origin/dev[27m[27D[27mg[27mi[27mt[27m [27mr[27me[27ms[27me[27mt[27m [27m-[27m-[27mh[27ma[27mr[27md[27m [27mo[27mr[27mi[27mg[27mi[27mn[27m/[27md[27me[27mv[?1l>[?2004l
-]2;git reset --hard origin/dev]1;gitHEAD is now at bb19d1b Merge pull request #15 from Abdalla2024/rnolley1/listing
-[1m[7m%[27m[1m[0m                                                                                     ]2;rasheednolley@Rasheeds-MacBook-Air-2:~/Documents/COSC484_Project]1;..SC484_Project]7;file://Rasheeds-MacBook-Air-2.local/Users/rasheednolley/Documents/COSC484_Project\[0m[27m[24m[J[01;32m➜  [36mCOSC484_Project[00m [01;34mgit:([31mdev[34m) [33m✗[00m [K[?1h=[?2004hgit reset --hard origin/dev[23Dfetch origin           [11D[12Dpull origin dev[19Dnpm run dev        [8D[11Dnode server[11Dnpm run dev[?1l>[?2004l
-]2;npm run dev]1;npm
-> my-app@0.0.0 dev
-> vite
-
-[1G[0KRe-optimizing dependencies because lockfile has changed
-
-  [32m[1mVITE[22m v5.4.18[39m  [2mready in [0m[1m394[22m[2m[0m ms[22m
-
-  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
-[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
-[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
-
-
-
-
-
-
-
-
-
-
-
-
-
-[1;1H[0J[2m11:38:04 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Listing.jsx, /src/index.css, /src/App.css[22m
-
-
-
-
-
-
-
-
-
-
-
-
-
-[1;1H[0J[2m11:38:08 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css, /src/App.css[22m
