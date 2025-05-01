@@ -51,6 +51,20 @@ export const listingService = {
     // For now, we'll just return URLs of the images
     // In a production environment, you'd want to upload these to a storage service
     return images.map(image => URL.createObjectURL(image));
+  },
+
+  getListingById: async (id) => {
+    try {
+      const response = await fetch(`${API_URL}/listing/${id}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to fetch listing');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching listing:', error);
+      throw error;
+    }
   }
 };
 
