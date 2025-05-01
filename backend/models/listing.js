@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const listingSchema = new Schema({
-  sellerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  sellerId: { type: Schema.Types.ObjectId, ref: 'User', required: false },
   title:     { type: String, required: true },
   description:{ type: String, required: true },
   price:     { type: Number, required: true },
