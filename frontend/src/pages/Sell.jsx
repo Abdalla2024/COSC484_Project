@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import listingService from '../services/listingService';
 
 function Sell() {
   const categories = ['Textbooks', 'Electronics', 'Furniture', 'Clothing', 'School Supplies', 'Dorm Essentials', 
@@ -10,7 +12,6 @@ function Sell() {
     description: '',
     price: '0',
     notes: '',
-    images: []
   });
 
   const [images, setImages] = useState([]);
@@ -20,19 +21,20 @@ function Sell() {
   const [deliveryMethod, setDeliveryMethod] = useState('');
   const [meetupLocation, setMeetupLocation] = useState('');
   const [showLocationInput, setShowLocationInput] = useState(false);
+  const navigate = useNavigate();
 
   const conditions = [
     { value: 'new', label: 'New' },
-    { value: 'like_new', label: 'Like New' },
+    { value: 'like new', label: 'Like New' },
     { value: 'good', label: 'Good' },
     { value: 'fair', label: 'Fair' },
     { value: 'poor', label: 'Poor' }
   ];
 
   const deliveryOptions = [
-    { value: 'Delivery', label: 'Devlivery Only' },
-    { value: 'meetup', label: 'Meetup Only' },
-    { value: 'both', label: 'Shipping or Meetup' }
+    { value: 'Shipping', label: 'Delivery Only' },
+    { value: 'Meetup', label: 'Meetup Only' },
+    { value: 'Both', label: 'Shipping or Meetup' }
   ];
 
   const handleInputChange = (e) => {
@@ -53,30 +55,58 @@ function Sell() {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
+    if (files.length > 5) {
+      setError('Maximum 5 images allowed');
+      return;
+    }
     
     // Create preview URLs
     const newPreviewUrls = files.map(file => URL.createObjectURL(file));
-    setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+    setPreviewUrls(newPreviewUrls); // Replace existing previews
     
     // Store the actual files
-    setImages(prev => [...prev, ...files]);
-    setError(''); // Clear any previous errors
+    setImages(files); // Replace existing files
+    setError('');
   };
 
   const removeImage = (index) => {
     setPreviewUrls(prev => prev.filter((_, i) => i !== index));
     setImages(prev => prev.filter((_, i) => i !== index));
-    setError(''); // Clear any previous errors
+    setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (images.length < 3) {
       setError('Please upload at least 3 photos of your item');
       return;
     }
-    console.log(productData);
-    // Add your submission logic here
+
+    try {
+      // Format the data according to the backend model requirements
+      const listingData = {
+        title: productData.title,
+        description: productData.description,
+        price: parseFloat(productData.price),
+        category: productData.category,
+        condition: condition,
+        images: previewUrls, // For now, using preview URLs
+        deliveryMethod: deliveryMethod,
+        meetupLocation: showLocationInput ? meetupLocation : undefined,
+        status: 'active',
+        // Temporary sellerId - you'll want to replace this with actual user authentication
+        sellerId: '65f3b1234567890123456789'
+      };
+
+      // Submit to backend
+      await listingService.createListing(listingData);
+      
+      // Redirect to home page on success
+      navigate('/');
+    } catch (err) {
+      setError(err.message || 'Failed to create listing. Please try again.');
+      console.error('Error creating listing:', err);
+    }
   };
 
   return (
@@ -161,7 +191,7 @@ function Sell() {
                     type="button"
                     onClick={() => {
                       setDeliveryMethod(option.value);
-                      setShowLocationInput(option.value === 'meetup' || option.value === 'both');
+                      setShowLocationInput(option.value === 'Meetup' || option.value === 'Both');
                     }}
                     className={`w-full p-3 border rounded-lg text-sm font-medium transition-colors ${
                       deliveryMethod === option.value
