@@ -11,7 +11,7 @@ const app = express()
 
 // Configure CORS with specific options
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'], // Add your frontend URL
+    origin: true, // Allow all origins
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true // Enable credentials (cookies, authorization headers, etc)
