@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../auth/firebaseconfig';
 
+const API_URL = 'http://localhost:3000/api';
+
 function SignUp() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -31,12 +33,42 @@ function SignUp() {
     }
 
     try {
+      // Create Firebase user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
+      // Update Firebase profile
       await updateProfile(user, {
         displayName: `${firstName} ${lastName}`
       });
+
+      // Sync with MongoDB
+      try {
+        console.log('Attempting to sync user with MongoDB...');
+        const response = await fetch(`${API_URL}/users/sync`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            uid: user.uid,
+            email: user.email,
+            displayName: `${firstName} ${lastName}`,
+            photoURL: user.photoURL
+          })
+        });
+
+        console.log('Sync response status:', response.status);
+        const data = await response.json();
+        console.log('Sync response data:', data);
+
+        if (!response.ok) {
+          throw new Error('Failed to sync user with database');
+        }
+      } catch (syncError) {
+        console.error('Error syncing user with MongoDB:', syncError);
+        // Continue with navigation even if sync fails
+      }
 
       navigate('/');
     } catch (error) {
