@@ -1,53 +1,52 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ListingCard from '../components/ListingCard';
+import listingService from '../services/listingService';
 
 function Home() {
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
   const categories = ['Textbooks', 'Electronics', 'Furniture', 'Clothing', 'School Supplies', 'Dorm Essentials', 
     'Sports Equipment', 'Musical Instruments', 'Art Supplies', 'Lab Equipment'];
 
-  // Mock data for demonstration
-  const mockListings = [
-    {
-      id: 1,
-      title: "Computer Science Textbook",
-      description: "Latest edition, barely used",
-      price: 75.00,
-      status: "active",
-      imageUrl: "https://picsum.photos/seed/1/800/600",
-      date: "2024-03-15",
-      offers: 2
-    },
-    {
-      id: 2,
-      title: "Calculator TI-84",
-      description: "Good condition",
-      price: 45.00,
-      status: "active",
-      imageUrl: "https://picsum.photos/seed/2/800/600",
-      date: "2024-03-10",
-      offers: 0
-    },
-    {
-      id: 3,
-      title: "Study Desk",
-      description: "Perfect for dorm rooms",
-      price: 120.00,
-      status: "active",
-      imageUrl: "https://picsum.photos/seed/3/800/600",
-      date: "2024-03-18",
-      offers: 1
-    },
-    {
-      id: 4,
-      title: "Physics Lab Manual",
-      description: "2023 Edition",
-      price: 25.00,
-      status: "active",
-      imageUrl: "https://picsum.photos/seed/4/800/600",
-      date: "2024-03-14",
-      offers: 0
-    }
-  ];
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const data = await listingService.getAllListings();
+        setListings(data);
+      } catch (err) {
+        setError('Failed to fetch listings');
+        console.error('Error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchListings();
+  }, []);
+
+  const filteredListings = selectedCategory
+    ? listings.filter(listing => listing.category === selectedCategory)
+    : listings;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white pt-20 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading listings...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white pt-20 flex items-center justify-center">
+        <div className="text-xl text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white pt-20">
@@ -67,10 +66,22 @@ function Home() {
               Categories
             </h2>
             <div className="flex flex-col gap-2">
+              <button
+                key="all"
+                onClick={() => setSelectedCategory(null)}
+                className={`text-left px-4 py-2 rounded-lg transition-colors ${
+                  !selectedCategory ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 hover:text-white'
+                }`}
+              >
+                All Categories
+              </button>
               {categories.map((category) => (
                 <button
                   key={category}
-                  className="text-left px-4 py-2 rounded-lg hover:bg-yellow-500 hover:text-white transition-colors"
+                  onClick={() => setSelectedCategory(category)}
+                  className={`text-left px-4 py-2 rounded-lg transition-colors ${
+                    selectedCategory === category ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 hover:text-white'
+                  }`}
                 >
                   {category}
                 </button>
@@ -82,15 +93,21 @@ function Home() {
         {/* Main Content */}
         <div className="flex-1 pl-64">
           <div className="p-6 max-w-[calc(100vw-16rem)]">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
-              {mockListings.map(listing => (
-                <Link to={`/listing/${listing.id}`} key={listing.id} className="h-full">
-                  <div className="h-full">
-                    <ListingCard listing={listing} />
-                  </div>
-                </Link>
-              ))}
-            </div>
+            {filteredListings.length === 0 ? (
+              <div className="text-center text-gray-600 mt-8">
+                No listings found{selectedCategory ? ` in ${selectedCategory}` : ''}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
+                {filteredListings.map(listing => (
+                  <Link to={`/listing/${listing._id}`} key={listing._id} className="h-full">
+                    <div className="h-full">
+                      <ListingCard listing={listing} />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

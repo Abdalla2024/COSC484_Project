@@ -1,57 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import ListingCard from '../components/ListingCard';
-import { formatDistanceToNow } from 'date-fns';
+import { format } from 'timeago.js';
 import AccountPFP from '../components/AccountPFP';
+import listingService from '../services/listingService';
 
 function Listing() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [listing, setListing] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Mock listing with multiple images
-  const mockListing = {
-    id: id,
-    title: "Computer Science Textbook",
-    description: "Latest edition, barely used. Perfect condition with no markings or highlights. Includes online access code that hasn't been used. Great for CS101 and CS102 courses.",
-    price: 75.00,
-    status: "active",
-    condition: "like_new",
-    category: "Textbooks",
-    images: [
-      `https://picsum.photos/seed/${id}/800/600`,
-      `https://picsum.photos/seed/${id + 1}/800/600`,
-      `https://picsum.photos/seed/${id + 2}/800/600`,
-      `https://picsum.photos/seed/${id + 3}/800/600`,
-      `https://picsum.photos/seed/${id + 4}/800/600`,
-    ],
-    date: "2024-03-15",
-    offers: 2,
-    deliveryMethod: "both",
-    meetupLocation: "Starbucks on Main St"
-  };
+  useEffect(() => {
+    const fetchListing = async () => {
+      try {
+        const data = await listingService.getListingById(id);
+        setListing(data);
+      } catch (err) {
+        setError(err.message || 'Failed to fetch listing');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Mock seller data for testing
-  const seller = {
-    _id: 'user123',
-    username: 'JohnDoe',
-    profileImage: 'https://via.placeholder.com/100',
-    rating: 4.8
-  };
+    fetchListing();
+  }, [id]);
 
   const conditions = [
     { value: 'new', label: 'New' },
-    { value: 'like_new', label: 'Like New' },
+    { value: 'like new', label: 'Like New' },
     { value: 'good', label: 'Good' },
     { value: 'fair', label: 'Fair' },
     { value: 'poor', label: 'Poor' }
   ];
 
   const deliveryOptions = [
-    { value: 'Delivery', label: 'Delivery Only' },
-    { value: 'meetup', label: 'Meetup Only' },
-    { value: 'both', label: 'Shipping or Meetup' }
+    { value: 'Shipping', label: 'Delivery Only' },
+    { value: 'Meetup', label: 'Meetup Only' },
+    { value: 'Both', label: 'Shipping or Meetup' }
   ];
 
   const handleMessageClick = () => {
@@ -59,7 +48,7 @@ function Listing() {
   };
 
   const handleReviewsClick = () => {
-    navigate(`/account-reviews/${seller._id}`);
+    navigate(`/account-reviews/${listing?.seller?._id}`);
   };
 
   const handleImageClick = () => {
@@ -71,12 +60,46 @@ function Listing() {
   };
 
   const handleSellerClick = () => {
-    console.log('Seller clicked, navigating to:', `/profile/${seller._id}`); // Debug log
-    navigate(`/profile/${seller._id}`);
+    console.log('Seller clicked, navigating to:', `/profile/${listing?.seller?._id}`); // Debug log
+    navigate(`/profile/${listing?.seller?._id}`);
   };
 
   // Default profile picture URL
   const defaultPfp = "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png";
+
+  // Format date safely
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Date not available';
+    try {
+      return format(new Date(dateString));
+    } catch (err) {
+      return 'Invalid date';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-16 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading listing...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen pt-16 flex items-center justify-center">
+        <div className="text-xl text-red-600">{error}</div>
+      </div>
+    );
+  }
+
+  if (!listing) {
+    return (
+      <div className="min-h-screen pt-16 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Listing not found</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-16 px-4 sm:px-6 lg:px-8">
@@ -90,72 +113,82 @@ function Listing() {
               onClick={handleImageClick}
             >
               <img
-                src={mockListing.images[selectedImage]}
-                alt={mockListing.title}
+                src={listing.images?.[selectedImage] || 'https://via.placeholder.com/800x600'}
+                alt={listing.title}
                 className={`w-full h-[600px] object-contain transition-transform duration-300 ${
                   isZoomed ? 'scale-150' : 'scale-100'
                 }`}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://via.placeholder.com/800x600';
+                }}
               />
             </div>
 
             {/* Thumbnail Gallery */}
-            <div className="grid grid-cols-5 gap-3">
-              {mockListing.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`relative aspect-square rounded-lg overflow-hidden ${
-                    selectedImage === index ? 'ring-2 ring-[#FFBB00]' : 'ring-1 ring-gray-200'
-                  } hover:opacity-90 transition-opacity`}
-                >
-                  <img
-                    src={image}
-                    alt={`${mockListing.title} - Image ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
+            {listing.images && listing.images.length > 0 && (
+              <div className="grid grid-cols-5 gap-3">
+                {listing.images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImage(index)}
+                    className={`relative aspect-square rounded-lg overflow-hidden ${
+                      selectedImage === index ? 'ring-2 ring-[#FFBB00]' : 'ring-1 ring-gray-200'
+                    } hover:opacity-90 transition-opacity`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${listing.title} - Image ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://via.placeholder.com/200x200';
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right Column - Listing Details */}
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                {mockListing.title}
+                {listing.title}
               </h1>
               <p className="text-2xl font-bold text-[#FFB800] mb-4">
-                ${mockListing.price}
+                ${listing.price}
               </p>
               
               {/* Condition */}
               <div className="mb-4">
                 <span className="text-sm font-medium text-gray-700">Condition:</span>
                 <span className="ml-2 px-3 py-1 rounded-full text-sm font-medium bg-[#FFBB00] text-black">
-                  {conditions.find(c => c.value === mockListing.condition)?.label}
+                  {conditions.find(c => c.value === listing.condition)?.label}
                 </span>
               </div>
 
               {/* Category */}
               <div className="mb-4">
                 <span className="text-sm font-medium text-gray-700">Category:</span>
-                <span className="ml-2 text-gray-600">{mockListing.category}</span>
+                <span className="ml-2 text-gray-600">{listing.category}</span>
               </div>
 
               <div className="space-y-4">
                 <p className="text-gray-700">
-                  {mockListing.description}
+                  {listing.description}
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">
-                    Posted {formatDistanceToNow(new Date(mockListing.date), { addSuffix: true })}
+                    Posted {formatDate(listing.createdAt)}
                   </span>
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    mockListing.status === 'sold' ? 'bg-red-100 text-red-800' :
-                    mockListing.status === 'active' ? 'bg-green-100 text-green-800' :
+                    listing.status === 'sold' ? 'bg-red-100 text-red-800' :
+                    listing.status === 'active' ? 'bg-green-100 text-green-800' :
                     'bg-yellow-100 text-yellow-800'
                   }`}>
-                    {mockListing.status}
+                    {listing.status}
                   </span>
                 </div>
               </div>
@@ -164,11 +197,11 @@ function Listing() {
               <div className="mt-4">
                 <span className="text-sm font-medium text-gray-700">Delivery Method:</span>
                 <span className="ml-2 px-3 py-1 rounded-full text-sm font-medium bg-[#FFBB00] text-black">
-                  {deliveryOptions.find(d => d.value === mockListing.deliveryMethod)?.label}
+                  {deliveryOptions.find(d => d.value === listing.deliveryMethod)?.label}
                 </span>
-                {mockListing.meetupLocation && (
+                {listing.meetupLocation && (
                   <p className="mt-2 text-sm text-gray-600">
-                    Meetup Location: {mockListing.meetupLocation}
+                    Meetup Location: {listing.meetupLocation}
                   </p>
                 )}
               </div>
@@ -196,13 +229,13 @@ function Listing() {
               {/* Seller Info Section */}
               <div className="flex flex-col items-start gap-2 mb-6">
                 <div 
-                  onClick={() => navigate(`/profile/${seller._id}`)}
+                  onClick={() => navigate(`/profile/${listing?.seller?._id}`)}
                   className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 p-1 rounded-lg transition-colors"
                 >
                   <div className="relative">
                     <img
-                      src={seller.profileImage || "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"}
-                      alt={seller.username}
+                      src={listing?.seller?.profileImage || "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"}
+                      alt={listing?.seller?.username}
                       className="w-12 h-12 rounded-full object-cover"
                       onError={(e) => {
                         e.target.src = "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png";
@@ -211,11 +244,11 @@ function Listing() {
                     <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
                   </div>
                   
-                  <span className="text-xl font-medium text-black">{seller.username || 'Unknown User'}</span>
+                  <span className="text-xl font-medium text-black">{listing?.seller?.username || 'Unknown User'}</span>
                 </div>
 
                 <div 
-                  onClick={() => navigate(`/reviews/${seller._id}`)}
+                  onClick={() => navigate(`/reviews/${listing?.seller?._id}`)}
                   className="text-blue-600 hover:underline cursor-pointer"
                 >
                   See Reviews →
@@ -256,8 +289,8 @@ function Listing() {
         >
           <div className="relative w-full h-full p-4 flex items-center justify-center">
             <img
-              src={mockListing.images[selectedImage]}
-              alt={mockListing.title}
+              src={listing.images?.[selectedImage] || 'https://via.placeholder.com/800x600'}
+              alt={listing.title}
               className="max-w-[90vw] max-h-[90vh] object-contain"
             />
             <button
