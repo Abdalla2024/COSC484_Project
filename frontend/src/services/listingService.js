@@ -1,9 +1,11 @@
-const API_URL = 'https://cosc-484-project-api.vercel.app/api';
+// Use environment variable for API URL, fallback to localhost for development
+const API_URL = `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api`;
 
 export const listingService = {
   // Get all listings
   getAllListings: async () => {
     try {
+      console.log('Fetching listings from:', `${API_URL}/listing`);
       const response = await fetch(`${API_URL}/listing`, {
         method: 'GET',
         headers: {
@@ -13,9 +15,16 @@ export const listingService = {
       
       if (!response.ok) {
         const error = await response.json();
+        console.error('Failed to fetch listings:', {
+          status: response.status,
+          statusText: response.statusText,
+          error
+        });
         throw new Error(error.error || 'Failed to fetch listings');
       }
-      return await response.json();
+      const data = await response.json();
+      console.log('Successfully fetched listings:', data);
+      return data;
     } catch (error) {
       console.error('Error fetching listings:', error);
       throw error;
@@ -25,8 +34,8 @@ export const listingService = {
   // Create a new listing
   createListing: async (listingData) => {
     try {
-      // Log the data being sent
-      console.log('Sending listing data:', listingData);
+      console.log('Creating listing with data:', listingData);
+      console.log('Sending request to:', `${API_URL}/listing`);
 
       const response = await fetch(`${API_URL}/listing`, {
         method: 'POST',
@@ -38,9 +47,16 @@ export const listingService = {
 
       if (!response.ok) {
         const error = await response.json();
+        console.error('Failed to create listing:', {
+          status: response.status,
+          statusText: response.statusText,
+          error
+        });
         throw new Error(error.error || 'Failed to create listing');
       }
-      return await response.json();
+      const data = await response.json();
+      console.log('Successfully created listing:', data);
+      return data;
     } catch (error) {
       console.error('Error creating listing:', error);
       throw error;
@@ -55,12 +71,20 @@ export const listingService = {
 
   getListingById: async (id) => {
     try {
+      console.log('Fetching listing by ID:', id);
       const response = await fetch(`${API_URL}/listing/${id}`);
       if (!response.ok) {
         const error = await response.json();
+        console.error('Failed to fetch listing:', {
+          status: response.status,
+          statusText: response.statusText,
+          error
+        });
         throw new Error(error.error || 'Failed to fetch listing');
       }
-      return await response.json();
+      const data = await response.json();
+      console.log('Successfully fetched listing:', data);
+      return data;
     } catch (error) {
       console.error('Error fetching listing:', error);
       throw error;
