@@ -10,13 +10,18 @@ const listingRoutes = require('./routes/listing.route')
 const app = express()
 
 // Configure CORS with specific options
-app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'], // Add your frontend URL
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true // Enable credentials (cookies, authorization headers, etc)
-}));
-
+app.use((req, res, next) => {
+    console.log('Request origin:', req.headers.origin); // Log the origin
+    cors({
+        origin: function(origin, callback) {
+            console.log('Checking origin:', origin); // Log the origin being checked
+            callback(null, true); // Temporarily allow all origins
+        },
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true
+    })(req, res, next);
+});
 
 // Add middleware
 app.use(express.json())
