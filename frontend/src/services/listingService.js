@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://cosc-484-project-api.vercel.app/api';
 
 export const listingService = {
   // Get all listings
