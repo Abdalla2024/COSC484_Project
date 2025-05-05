@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import { auth } from '../auth/firebaseconfig';
+
+
+const HOME_PAGE = 'http://localhost:5173/verify-complete';
 
 const API_URL = 'http://localhost:3000/api';
 
@@ -21,7 +24,7 @@ function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
@@ -35,8 +38,13 @@ function SignUp() {
     try {
       // Create Firebase user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+      // send verfificaiton email
+      await sendEmailVerification(userCredential.user, {
+        url: HOME_PAGE
+      });
       const user = userCredential.user;
-      
+
       // Update Firebase profile
       await updateProfile(user, {
         displayName: `${firstName} ${lastName}`
@@ -44,6 +52,7 @@ function SignUp() {
 
       // Sync with MongoDB
       try {
+
         console.log('Attempting to sync user with MongoDB...');
         const response = await fetch(`${API_URL}/users/sync`, {
           method: 'POST',
@@ -62,18 +71,22 @@ function SignUp() {
         const data = await response.json();
         console.log('Sync response data:', data);
 
+
         if (!response.ok) {
           throw new Error('Failed to sync user with database');
         }
+
+
       } catch (syncError) {
         console.error('Error syncing user with MongoDB:', syncError);
         // Continue with navigation even if sync fails
       }
 
-      navigate('/');
+      alert("Email verification Sent");
+      navigate('/verify-pending');
     } catch (error) {
       let errorMessage = "An error occurred during sign up";
-      
+
       switch (error.code) {
         case 'auth/email-already-in-use':
           errorMessage = "This email is already registered";
@@ -90,14 +103,14 @@ function SignUp() {
         default:
           errorMessage = error.message;
       }
-      
+
       setError(errorMessage);
     }
   };
 
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-       <div className="w-full max-w-md mx-4 space-y-8 p-8 bg-white rounded-lg shadow-md border border-gray-200">
+      <div className="w-full max-w-md mx-4 space-y-8 p-8 bg-white rounded-lg shadow-md border border-gray-200">
         <div>
           <h2 className="text-left text-3xl font-extrabold text-gray-700">
             Create your account

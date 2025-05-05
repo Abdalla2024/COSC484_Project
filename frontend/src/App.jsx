@@ -17,10 +17,13 @@ import Dispute from './pages/Dispute'
 import Reviews from './pages/Reviews'
 import OrderConfirmation from './pages/OrderConfirmation'
 import './App.css'
+import VerifyPage from './pages/VerifyPage';
+import VerifyComplete from './pages/VerifyComplete';
+
 
 function App() {
   const location = useLocation();
-  const isAuthPage = ['signin', 'signup'].includes(location.pathname.slice(1));
+  const isAuthPage = ['signin', 'signup', 'verify-pending'].includes(location.pathname.slice(1));
 
   if (isAuthPage) {
     return (
@@ -28,6 +31,7 @@ function App() {
         <Routes>
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/verify-pending" element={<VerifyPage />} />
         </Routes>
       </div>
     );
@@ -39,6 +43,8 @@ function App() {
       <div className="w-full">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/verify-pending" element={<VerifyPage />} />
+          <Route path="/verify-complete" element={<VerifyComplete />} />
           <Route path="/products" element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/profile" element={<Profile />} />
@@ -54,6 +60,7 @@ function App() {
           <Route path="/disputes/:orderId" element={<Dispute />} />
           <Route path="/reviews/:sellerId" element={<Reviews />} />
           <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+
         </Routes>
       </div>
     </div>
