@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -5,6 +6,18 @@ const { connectToDatabase } = require('./config/mongodb');
 const Listing = require('./models/listing');
 const Message = require('./models/message');
 const User    = require('./models/user');
+=======
+const express = require('express')
+const mongoose = require('mongoose')
+const cors = require('cors')
+require('dotenv').config()
+const MONGODB_URI = process.env.MONGODB_URI
+const Listing = require('./models/listing')
+const User = require('./models/user')
+const listingRoutes = require('./routes/listing.route')
+const checkoutRoutes = require('./routes/checkout.route');
+
+>>>>>>> ddb55d6 (Starting stripe implementation in backend)
 
 const app = express();
 
@@ -40,6 +53,7 @@ app.get('/api/listing', async (req, res, next) => {
   }
 });
 
+<<<<<<< HEAD
 // GET one listing by ID
 app.get('/api/listing/:id', async (req, res, next) => {
   try {
@@ -50,6 +64,16 @@ app.get('/api/listing/:id', async (req, res, next) => {
     next(error);
   }
 });
+=======
+// checkout route
+app.use('/api/checkout', checkoutRoutes);
+
+
+// Root route
+app.get('/', (req, res) => {
+    res.send('Hello World')
+})
+>>>>>>> ddb55d6 (Starting stripe implementation in backend)
 
 // ── User Endpoints 
 // Sync (upsert) user on sign-in
