@@ -26,8 +26,8 @@ app.use((req, res, next) => {
 });
 
 // Add middleware
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // User sync endpoint
 app.post('/api/users/sync', async (req, res) => {
