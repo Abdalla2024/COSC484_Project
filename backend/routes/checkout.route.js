@@ -7,6 +7,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 router.post('/create-checkout-session', async (req, res) => {
   const { id, title, price } = req.body;
+  console.log("Incoming checkout data:", req.body); // Debugging
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -20,8 +21,8 @@ router.post('/create-checkout-session', async (req, res) => {
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: 'http://localhost:5173/success',
-      cancel_url: 'http://localhost:5173/cancel',
+      success_url: 'http://localhost:5173/order-confirmation/:orderId',
+      cancel_url: 'http://localhost:5173/checkout/:listingId',
     });
 
     res.json({ id: session.id });
