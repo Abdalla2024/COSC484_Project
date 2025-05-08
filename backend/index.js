@@ -27,8 +27,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+<<<<<<< HEAD
 // Ensure MongoDB connection before handling any request
 app.use(async (req, res, next) => {
+=======
+// Add middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// User sync endpoint
+app.post('/api/users/sync', async (req, res) => {
+>>>>>>> 76f64ae (Finally got stripe payment working through click of button)
   try {
     await connectToDatabase();
     next();
