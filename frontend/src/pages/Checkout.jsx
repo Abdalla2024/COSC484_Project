@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe("pk_test_51R7L8iPKPGdvnNX7Q1z1VK2EszKUwsdiXL7fJedYyshWpvCeQy5cRkxUP9zoTM7BgzA5cWFEWsf9jmUF0VVe2E1H00vqWJfDGE");
+
 
 function Checkout() {
   const { listingId } = useParams();
@@ -20,10 +24,37 @@ function Checkout() {
 
   const handlePayment = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate(`/order-confirmation/${listingId}`);
-    }, 2000);
+
+    try {
+      const response = await fetch('http://localhost:3000/api/checkout/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: mockListing.id,
+          title: mockListing.title,
+          price: mockListing.price
+        })
+      });
+
+      const data = await response.json();
+      console.log("Stripe Session Data: ", data);
+      if (!data.id) {
+        throw new Error("No session ID returned from stripe.")
+      }
+
+      const stripe = await stripePromise;
+      await stripe.redirectToCheckout({ sessionId: data.id });
+    } catch (error) {
+        console.error("Stripe Checkout Error: ", error);
+        alert("An error occurred during checkout.");
+        setIsLoading(false);
+    }
+    // setTimeout(() => {
+    //   setIsLoading(false);
+    //   navigate(`/order-confirmation/${listingId}`);
+    // }, 2000);
   };
 
   return (
@@ -56,40 +87,7 @@ function Checkout() {
             </div>
           </div>
         </div>
-
-        {/* Payment Type Selection */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Choose Payment Type</h2>
-          <div className="space-y-4">
-            <label className="flex items-center space-x-3">
-              <input
-                type="radio"
-                name="paymentType"
-                value="direct"
-                checked={paymentType === 'direct'}
-                onChange={(e) => setPaymentType(e.target.value)}
-                className="h-4 w-4 text-[#FFB800] focus:ring-[#FFB800]"
-              />
-              <span className="text-gray-700">
-                Pay Now (funds go directly to seller)
-              </span>
-            </label>
-            <label className="flex items-center space-x-3">
-              <input
-                type="radio"
-                name="paymentType"
-                value="escrow"
-                checked={paymentType === 'escrow'}
-                onChange={(e) => setPaymentType(e.target.value)}
-                className="h-4 w-4 text-[#FFB800] focus:ring-[#FFB800]"
-              />
-              <span className="text-gray-700">
-                Escrow (buyer confirms delivery before funds release)
-              </span>
-            </label>
-          </div>
-        </div>
-
+        
         {/* Payment Form */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Payment Information</h2>
