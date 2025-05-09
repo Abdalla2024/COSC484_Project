@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import listingService from '../services/listingService';
 
@@ -8,7 +8,6 @@ const stripePromise = loadStripe("pk_test_51R7L8iPKPGdvnNX7Q1z1VK2EszKUwsdiXL7fJ
 
 function Checkout() {
   const { id } = useParams();
-  // const navigate = useNavigate();
   const [listing, setListing] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,17 +26,6 @@ function Checkout() {
   
       fetchListing();
     }, [id]);
-
-  // Mock data - in real app, this would come from an API call
-  // const mockListing = {
-  //   id: listingId,
-  //   title: "Computer Science Textbook",
-  //   price: 75.00,
-  //   description: "Latest edition, barely used. Perfect condition with no markings or highlights.",
-  //   image: `https://picsum.photos/seed/${listingId}/800/600`,
-  //   seller: "John Doe",
-  //   meetupLocation: "Starbucks on Main St"
-  // };
 
   const handlePayment = async () => {
 
@@ -67,10 +55,6 @@ function Checkout() {
         alert("An error occurred during checkout.");
         setIsLoading(false);
     }
-    // setTimeout(() => {
-    //   setIsLoading(false);
-    //   navigate(`/order-confirmation/${listingId}`);
-    // }, 2000);
   };
 
   return (
@@ -99,12 +83,16 @@ function Checkout() {
               <p className="text-gray-600 mb-4">{listing.description}</p>
               <p className="text-3xl font-bold text-[#FFB800] mb-3">${listing.price.toFixed(2)}</p>
               <div className="space-y-2">
-                <p className="text-sm text-gray-500">Sold by: {listing.seller}</p>
+                <p className="text-sm text-gray-500">Sold by: {listing.sellerId}</p>
                 <div className="flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                   </svg>
-                  <p className="text-sm text-gray-500">Meetup Location: {listing.meetupLocation}</p>
+                  <p className="text-sm text-gray-500">
+                    {listing.deliveryMethod === "Shipping" || !listing.meetupLocation
+                    ? "Delivery Only - no pickup location"
+                    : `Meetup Location: ${listing.meetupLocation}`}
+                  </p>
                 </div>
               </div>
             </div>
@@ -112,15 +100,15 @@ function Checkout() {
         </div>
 
         {/* Payment Form */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        {/* <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Payment Information</h2>
-          <div className="space-y-4">
+          <div className="space-y-4"> */}
             {/* Stripe Elements would go here */}
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+            {/* <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
               <p className="text-gray-500">Stripe Payment Form will be integrated here</p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Proceed Button */}
         <button
