@@ -36,7 +36,7 @@ function Checkout() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          id: listing.id,
+          id: listing._id,
           title: listing.title,
           price: listing.price
         })
