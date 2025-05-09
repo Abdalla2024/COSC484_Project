@@ -1,12 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'timeago.js';
+import { FaEdit } from 'react-icons/fa';
 
-function ListingCard({ listing }) {
+function ListingCard({ listing, onEdit, showEditButton = false }) {
   const navigate = useNavigate();
 
   const handleClick = () => {
     navigate(`/listing/${listing._id}`);
+  };
+
+  const handleEditClick = (e) => {
+    e.stopPropagation(); // Prevent the card click event
+    onEdit(listing);
   };
 
   // Function to format the date
@@ -41,11 +47,29 @@ function ListingCard({ listing }) {
             e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
           }}
         />
+<<<<<<< HEAD
         <div className="absolute top-2 right-2">
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${listing.status === 'sold' ? 'bg-red-100 text-red-800' :
               listing.status === 'active' ? 'bg-green-100 text-green-800' :
                 'bg-yellow-100 text-yellow-800'
             }`}>
+=======
+        <div className="absolute top-2 right-2 flex gap-2">
+          {showEditButton && (
+            <button
+              onClick={handleEditClick}
+              className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 transition-colors"
+              title="Edit listing"
+            >
+              <FaEdit className="w-4 h-4 text-gray-600" />
+            </button>
+          )}
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            listing.status === 'sold' ? 'bg-red-100 text-red-800' :
+            listing.status === 'active' ? 'bg-green-100 text-green-800' :
+            'bg-yellow-100 text-yellow-800'
+          }`}>
+>>>>>>> ff3d0a8 (Added edit page)
             {listing.status}
           </span>
         </div>
