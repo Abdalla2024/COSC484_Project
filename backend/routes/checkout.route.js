@@ -16,13 +16,17 @@ router.post('/create-checkout-session', async (req, res) => {
         price_data: {
           currency: 'usd',
           product_data: { name: title },
-          unit_amount: price * 100,
+          unit_amount: Math.round(Number(price) * 100),
         },
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: 'http://localhost:5173/order-confirmation/:orderId',
-      cancel_url: 'http://localhost:5173/checkout/:listingId',
+      success_url: `http://localhost:5173/order-confirmation/${id}`,
+      cancel_url: `http://localhost:5173/checkout/${id}`,
+      metadata: {
+        listingId: id,
+        title,
+      },
     });
 
     res.json({ id: session.id });
