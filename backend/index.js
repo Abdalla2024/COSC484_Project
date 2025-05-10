@@ -29,11 +29,13 @@ connectDB().catch(error => {
 
 // Configure CORS with specific options
 app.use(cors({
-    origin: 'https://cosc-484-project-front-git-7cbc3b-abdalla-abdelmagids-projects.vercel.app',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-    optionsSuccessStatus: 204
+    origin: [
+        'https://cosc-484-project-front.vercel.app',
+        'https://cosc-484-project-front-git-7cbc3b-abdalla-abdelmagids-projects.vercel.app',
+        'http://localhost:5173'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
 }));
 
 // Add middleware
