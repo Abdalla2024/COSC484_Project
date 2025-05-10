@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../auth/firebaseconfig';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,7 @@ function Messages() {
   const [newMessage, setNewMessage] = useState('');
   const [conversations, setConversations] = useState([]);
   const [unreadCounts, setUnreadCounts] = useState({});
+  const messagesEndRef = useRef(null);
 
   const formatTimeAgo = (timestamp) => {
     const now = new Date();
@@ -27,6 +28,10 @@ function Messages() {
     } else {
       return `${Math.floor(diffInHours / 24)}d ago`;
     }
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -157,6 +162,9 @@ function Messages() {
       });
       
       fetchConversations(); // Refresh unread counts
+      
+      // Scroll to bottom after messages are loaded
+      setTimeout(scrollToBottom, 100);
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
@@ -201,6 +209,11 @@ function Messages() {
       fetchMessages();
     }
   }, [selectedUser]);
+
+  // Add effect to scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
@@ -314,6 +327,7 @@ function Messages() {
                   </div>
                 </div>
               ))}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Message Input */}
