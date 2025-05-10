@@ -3,7 +3,7 @@ const router = express.Router();
 const Conversation = require('../models/conversation');
 
 //Create a new conversation
-router.post('/conversation', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
       const { users } = req.body;
   
@@ -28,7 +28,7 @@ router.post('/conversation', async (req, res) => {
   });
   
   //Get all conversations
-  router.get('/conversations/:userId', async (req, res) => {
+  router.get('/:userId', async (req, res) => {
     try {
       const conversations = await Conversation.find({ users: req.params.userId })
         .populate('users', 'username fullName profilePicture')
