@@ -1,13 +1,7 @@
-<<<<<<< HEAD
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { loadStripe } from '@stripe/stripe-js';
-=======
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import listingService from '../services/listingService';
->>>>>>> origin/Domwinn2/checkout
 
 const stripePromise = loadStripe("pk_test_51R7L8iPKPGdvnNX7Q1z1VK2EszKUwsdiXL7fJedYyshWpvCeQy5cRkxUP9zoTM7BgzA5cWFEWsf9jmUF0VVe2E1H00vqWJfDGE");
 
@@ -34,10 +28,6 @@ function Checkout() {
     }, [id]);
 
   const handlePayment = async () => {
-<<<<<<< HEAD
-    setIsLoading(true);
-=======
->>>>>>> origin/Domwinn2/checkout
 
     try {
       const response = await fetch('http://localhost:3000/api/checkout/create-checkout-session', {
@@ -46,15 +36,9 @@ function Checkout() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-<<<<<<< HEAD
-          id: mockListing.id,
-          title: mockListing.title,
-          price: mockListing.price
-=======
           id: listing._id,
           title: listing.title,
           price: listing.price
->>>>>>> origin/Domwinn2/checkout
         })
       });
 
@@ -71,13 +55,6 @@ function Checkout() {
         alert("An error occurred during checkout.");
         setIsLoading(false);
     }
-<<<<<<< HEAD
-    // setTimeout(() => {
-    //   setIsLoading(false);
-    //   navigate(`/order-confirmation/${listingId}`);
-    // }, 2000);
-=======
->>>>>>> origin/Domwinn2/checkout
   };
 
   return (
@@ -121,11 +98,6 @@ function Checkout() {
             </div>
           </div>
         </div>
-<<<<<<< HEAD
-        
-=======
-
->>>>>>> origin/Domwinn2/checkout
         {/* Payment Form */}
         {/* <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Payment Information</h2>

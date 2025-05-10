@@ -7,6 +7,7 @@ const Listing = require('./models/listing')
 const User = require('./models/user')
 const listingRoutes = require('./routes/listing.route')
 const checkoutRoutes = require('./routes/checkout.route');
+const conversationRoutes = require('./routes/conversation.route')
 
 
 const app = express()
@@ -92,6 +93,8 @@ app.use('/api/listing', listingRoutes)
 
 // checkout route
 app.use('/api/checkout', checkoutRoutes);
+
+app.use('/api/conversation', conversationRoutes)
 
 
 // Root route
