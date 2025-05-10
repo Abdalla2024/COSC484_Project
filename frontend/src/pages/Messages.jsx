@@ -3,7 +3,8 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../auth/firebaseconfig';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
+console.log('API_URL:', API_URL);
 
 function Messages() {
   const [user, loading] = useAuthState(auth);
@@ -37,11 +38,12 @@ function Messages() {
 
     if (user) {
       console.log('Current user:', user);
+      console.log('Current user UID:', user.uid);
       // Create or get MongoDB user when Firebase user logs in
       const syncUser = async () => {
         try {
           console.log('Syncing user with MongoDB...');
-          const response = await fetch(`${API_URL}/users/sync`, {
+          const response = await fetch(`${API_URL}/api/users/sync`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -69,7 +71,7 @@ function Messages() {
     try {
       console.log('Fetching conversations...');
       // Get all messages for the current user
-      const messagesResponse = await fetch(`${API_URL}/messages/user/${user.uid}`, {
+      const messagesResponse = await fetch(`${API_URL}/api/messages/user/${user.uid}`, {
         credentials: 'include'
       });
       const allMessages = await messagesResponse.json();
@@ -93,14 +95,14 @@ function Messages() {
       for (const userId of uniqueUserIds) {
         try {
           console.log(`Fetching user details for ${userId}...`);
-          const userResponse = await fetch(`${API_URL}/users/${userId}`, {
+          const userResponse = await fetch(`${API_URL}/api/users/${userId}`, {
             credentials: 'include'
           });
           const userData = await userResponse.json();
           console.log(`User details for ${userId}:`, userData);
           
           // Get unread count
-          const countResponse = await fetch(`${API_URL}/messages/unread/${user.uid}/${userId}`, {
+          const countResponse = await fetch(`${API_URL}/api/messages/unread/${user.uid}/${userId}`, {
             credentials: 'include'
           });
           const count = await countResponse.json();
@@ -141,7 +143,7 @@ function Messages() {
     if (!selectedUser) return;
     try {
       console.log('Fetching messages between', user.uid, 'and', selectedUser.firebaseId);
-      const response = await fetch(`${API_URL}/messages/${user.uid}/${selectedUser.firebaseId}`, {
+      const response = await fetch(`${API_URL}/api/messages/${user.uid}/${selectedUser.firebaseId}`, {
         credentials: 'include'
       });
       const messages = await response.json();
@@ -149,7 +151,7 @@ function Messages() {
       setMessages(messages);
       
       // Mark messages as read
-      await fetch(`${API_URL}/messages/read/${user.uid}/${selectedUser.firebaseId}`, {
+      await fetch(`${API_URL}/api/messages/read/${user.uid}/${selectedUser.firebaseId}`, {
         method: 'PUT',
         credentials: 'include'
       });
@@ -170,7 +172,7 @@ function Messages() {
         receiverId: selectedUser.firebaseId,
         content: newMessage.trim()
       });
-      await fetch(`${API_URL}/messages`, {
+      await fetch(`${API_URL}/api/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
