@@ -6,6 +6,8 @@ const MONGODB_URI = process.env.MONGODB_URI
 const Listing = require('./models/listing')
 const User = require('./models/user')
 const listingRoutes = require('./routes/listing.route')
+const messageRoutes = require('./routes/message.route')
+const userRoutes = require('./routes/user.route')
 
 const app = express()
 
@@ -85,8 +87,10 @@ app.post('/api/listing', async (req, res) => {
     }
 });
 
-// Use the listing routes
+// Use the routes
 app.use('/api/listing', listingRoutes)
+app.use('/api/messages', messageRoutes)
+app.use('/api/users', userRoutes)
 
 // Root route
 app.get('/', (req, res) => {
