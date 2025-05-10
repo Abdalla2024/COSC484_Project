@@ -28,12 +28,17 @@ connectDB().catch(error => {
 });
 
 // Configure CORS with specific options
-app.use(cors({
-    origin: ['https://cosc-484-project-front.vercel.app', 'http://localhost:5173'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-}));
+app.use((req, res, next) => {
+    console.log('Incoming request from origin:', req.headers.origin);
+    cors({
+        origin: true, // Allow all origins temporarily
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true,
+        preflightContinue: false,
+        optionsSuccessStatus: 204
+    })(req, res, next);
+});
 
 // Add middleware
 app.use(express.json())
