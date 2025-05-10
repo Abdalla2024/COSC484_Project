@@ -121,15 +121,15 @@ app.post('/api/listing', async (req, res) => {
     }
 });
 
+// Root route
+app.get('/', (req, res) => {
+    res.json({ message: 'COSC484 Project API is running' });
+});
+
 // Use the routes
 app.use('/api/listing', listingRoutes)
 app.use('/api/messages', messageRoutes)
 app.use('/api/users', userRoutes)
-
-// Root route
-app.get('/', (req, res) => {
-    res.send('Hello World')
-})
 
 // Error handling middleware
 app.use((err, req, res, next) => {
