@@ -44,13 +44,20 @@ router.get('/:userId/:otherUserId', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const { senderId, receiverId, content } = req.body;
+        console.log('Creating new message:', { senderId, receiverId, content });
+        
         const message = await Message.create({
             senderId,
             receiverId,
-            content
+            content,
+            read: false, // Explicitly set read status to false
+            timestamp: new Date()
         });
+        
+        console.log('Created message:', message);
         res.status(201).json(message);
     } catch (error) {
+        console.error('Error creating message:', error);
         res.status(500).json({ error: error.message });
     }
 });
