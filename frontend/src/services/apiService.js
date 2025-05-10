@@ -1,7 +1,7 @@
 // API service for handling MongoDB operations
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 
 export const fetchMessages = async (userId, otherUserId) => {
   const response = await axios.get(`${API_URL}/messages/${userId}/${otherUserId}`);

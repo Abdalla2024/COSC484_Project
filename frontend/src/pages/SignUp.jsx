@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../auth/firebaseconfig';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 
 function SignUp() {
   const [firstName, setFirstName] = useState('');

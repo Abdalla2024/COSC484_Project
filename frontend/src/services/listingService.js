@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 
 export const listingService = {
   // Get all listings
