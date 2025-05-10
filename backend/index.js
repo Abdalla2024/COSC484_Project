@@ -29,30 +29,10 @@ connectDB().catch(error => {
 
 // Configure CORS with specific options
 app.use(cors({
-    origin: function(origin, callback) {
-        const allowedOrigins = [
-            'https://cosc-484-project-front.vercel.app',
-            'https://cosc-484-project-front-git-7cbc3b-abdalla-abdelmagids-projects.vercel.app',
-            'http://localhost:5173'
-        ];
-        console.log('Request origin:', origin);
-        
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        
-        if (allowedOrigins.indexOf(origin) === -1) {
-            console.log('Origin not allowed:', origin);
-            return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
-        }
-        
-        console.log('Origin allowed:', origin);
-        return callback(null, true);
-    },
-    credentials: true,
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Content-Range', 'X-Content-Range'],
-    maxAge: 600 // Cache preflight request for 10 minutes
+    credentials: true
 }));
 
 // Add middleware
