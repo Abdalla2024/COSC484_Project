@@ -1,12 +1,12 @@
 require('dotenv').config();
 const express = require('express')
-const cors = require('cors')
 const { connectDB } = require('./config/mongodb')
 const Listing = require('./models/listing')
 const User = require('./models/user')
 const listingRoutes = require('./routes/listing.route')
 const messageRoutes = require('./routes/message.route')
 const userRoutes = require('./routes/user.route')
+const allowCors = require('./middleware/cors')
 
 const app = express()
 
@@ -27,16 +27,8 @@ connectDB().catch(error => {
   process.exit(1);
 });
 
-// Configure CORS with specific options
-app.use(cors({
-    origin: [
-        'https://cosc-484-project-front.vercel.app',
-        'https://cosc-484-project-front-git-7cbc3b-abdalla-abdelmagids-projects.vercel.app',
-        'http://localhost:5173'
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-}));
+// Use CORS middleware
+app.use(allowCors)
 
 // Add middleware
 app.use(express.json())
