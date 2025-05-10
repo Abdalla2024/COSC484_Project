@@ -27,21 +27,16 @@ app.use(express.urlencoded({ extended: true }))
 
 // CORS middleware
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  console.log('Request origin:', origin);
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
   
-  if (origin === 'https://cosc-484-project-front-git-7cbc3b-abdalla-abdelmagids-projects.vercel.app') {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  }
-
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
   }
-
+  
   next();
 });
 
