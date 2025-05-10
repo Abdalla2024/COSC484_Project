@@ -28,8 +28,25 @@ connectDB().catch(error => {
 });
 
 // Configure CORS with specific options
+const allowedOrigins = [
+  'https://cosc-484-project-front.vercel.app',
+  'https://cosc-484-project-front-git-7cbc3b-abdalla-abdelmagids-projects.vercel.app',
+  'http://localhost:5173'
+];
+
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) === -1) {
+            console.log('Blocked by CORS:', origin);
+            return callback(new Error('Not allowed by CORS'), false);
+        }
+        
+        console.log('Allowed by CORS:', origin);
+        return callback(null, true);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
