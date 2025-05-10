@@ -1,8 +1,7 @@
+require('dotenv').config();
 const express = require('express')
-const mongoose = require('mongoose')
 const cors = require('cors')
-require('dotenv').config()
-const MONGODB_URI = process.env.MONGODB_URI
+const { connectDB } = require('./config/mongodb')
 const Listing = require('./models/listing')
 const User = require('./models/user')
 const listingRoutes = require('./routes/listing.route')
@@ -10,6 +9,23 @@ const messageRoutes = require('./routes/message.route')
 const userRoutes = require('./routes/user.route')
 
 const app = express()
+
+// Add error handling for uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (error) => {
+  console.error('Unhandled Rejection:', error);
+  process.exit(1);
+});
+
+// Connect to MongoDB
+connectDB().catch(error => {
+  console.error('Failed to connect to MongoDB:', error);
+  process.exit(1);
+});
 
 // Configure CORS with specific options
 app.use((req, res, next) => {
@@ -28,6 +44,12 @@ app.use((req, res, next) => {
 // Add middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+// Add request logging middleware
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
 
 // User sync endpoint
 app.post('/api/users/sync', async (req, res) => {
@@ -99,19 +121,16 @@ app.get('/', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack)
-    res.status(500).send('Something broke!')
+    console.error('Error:', err);
+    res.status(500).json({ 
+        error: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
 })
 
-// Start server
-app.listen(3000, () => {
-    console.log('Server is running on http://localhost:3000')
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`MongoDB URI: ${process.env.MONGODB_URI ? 'Set' : 'Not set'}`);
 })
-
-mongoose.connect(MONGODB_URI)
-    .then(() => {
-        console.log('Connected to MongoDB')
-    })
-    .catch((err) => {
-        console.error('Error connecting to MongoDB', err)
-    })
