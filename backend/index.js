@@ -6,7 +6,6 @@ const User = require('./models/user')
 const listingRoutes = require('./routes/listing.route')
 const messageRoutes = require('./routes/message.route')
 const userRoutes = require('./routes/user.route')
-const allowCors = require('./middleware/cors')
 
 const app = express()
 
@@ -16,28 +15,34 @@ process.on('uncaughtException', (error) => {
   process.exit(1);
 });
 
-process.on('unhandledRejection', (error) => {
-  console.error('Unhandled Rejection:', error);
-  process.exit(1);
-});
-
 // Connect to MongoDB
 connectDB().catch(error => {
   console.error('Failed to connect to MongoDB:', error);
   process.exit(1);
 });
 
-// Use CORS middleware
-app.use(allowCors)
-
 // Add middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// Add request logging middleware
+// CORS middleware
 app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-    next();
+  const origin = req.headers.origin;
+  console.log('Request origin:', origin);
+  
+  if (origin === 'https://cosc-484-project-front-git-7cbc3b-abdalla-abdelmagids-projects.vercel.app') {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  next();
 });
 
 // User sync endpoint
