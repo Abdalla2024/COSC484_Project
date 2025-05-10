@@ -29,17 +29,28 @@ connectDB().catch(error => {
 
 // Configure CORS with specific options
 app.use((req, res, next) => {
+    const allowedOrigins = [
+        'https://cosc-484-project-front.vercel.app',
+        'https://cosc-484-project-front-git-7cbc3b-abdalla-abdelmagids-projects.vercel.app'
+    ];
+
+    const origin = req.headers.origin;
     console.log('Incoming request:', {
         method: req.method,
         path: req.path,
-        origin: req.headers.origin,
+        origin: origin,
         headers: req.headers
     });
 
-    res.header('Access-Control-Allow-Origin', 'https://cosc-484-project-front.vercel.app');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
+    if (allowedOrigins.includes(origin)) {
+        console.log('Setting CORS headers for origin:', origin);
+        res.header('Access-Control-Allow-Origin', origin);
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        res.header('Access-Control-Allow-Credentials', 'true');
+    } else {
+        console.log('Origin not allowed:', origin);
+    }
 
     if (req.method === 'OPTIONS') {
         console.log('Handling OPTIONS request');
