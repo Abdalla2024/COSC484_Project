@@ -244,7 +244,12 @@ function Messages() {
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
-                      <h3 className="font-semibold truncate text-black">{convo.displayName}</h3>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-semibold truncate text-black">{convo.displayName}</h3>
+                        {unreadCounts[convo.firebaseId]?.count > 0 && (
+                          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                        )}
+                      </div>
                       <span className="text-xs text-gray-500">
                         {convo.lastMessage ? formatTimeAgo(convo.lastMessage.timestamp) : ''}
                       </span>
