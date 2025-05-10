@@ -16,6 +16,7 @@ const Listing = require('./models/listing')
 const User = require('./models/user')
 const listingRoutes = require('./routes/listing.route')
 const checkoutRoutes = require('./routes/checkout.route');
+const conversationRoutes = require('./routes/conversation.route')
 
 >>>>>>> ddb55d6 (Starting stripe implementation in backend)
 
@@ -76,6 +77,8 @@ app.get('/api/listing/:id', async (req, res, next) => {
 =======
 // checkout route
 app.use('/api/checkout', checkoutRoutes);
+
+app.use('/api/conversation', conversationRoutes)
 
 
 // Root route
