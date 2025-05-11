@@ -21,6 +21,7 @@ import VerifyPage from './pages/VerifyPage';
 import VerifyComplete from './pages/VerifyComplete';
 
 
+
 function App() {
   const location = useLocation();
   const isAuthPage = ['signin', 'signup', 'verify-pending'].includes(location.pathname.slice(1));
@@ -48,13 +49,12 @@ function App() {
           <Route path="/products" element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/sell" element={<Sell />} />
           <Route path="/my-listings" element={<MyListings />} />
           <Route path="/listing/:id" element={<Listing />} />
           <Route path="/account-settings" element={<AccountSettings />} />
-          <Route path="/checkout/:listingId" element={<Checkout />} />
+          <Route path="/checkout/:id" element={<Checkout />} />
           <Route path="/my-orders" element={<Orders />} />
           <Route path="/orders/:orderId" element={<Orders />} />
           <Route path="/disputes/:orderId" element={<Dispute />} />

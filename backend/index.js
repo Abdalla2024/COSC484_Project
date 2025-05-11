@@ -40,6 +40,7 @@ app.get('/api/listing', async (req, res, next) => {
   }
 });
 
+
 // GET one listing by ID
 app.get('/api/listing/:id', async (req, res, next) => {
   try {
@@ -50,6 +51,12 @@ app.get('/api/listing/:id', async (req, res, next) => {
     next(error);
   }
 });
+
+
+// Root route
+app.get('/', (req, res) => {
+    res.send('Hello World')
+})
 
 // ── User Endpoints 
 // Sync (upsert) user on sign-in
@@ -149,6 +156,57 @@ app.get('/api/messages/unread/:userId/:otherUserId', async (req, res, next) => {
     });
     res.json({ count });
   } catch (error) {
+    next(error);
+  }
+});
+
+//--Search Functionality 
+app.get('/api/search/messages', async (req, res, next) => {
+  const searchTerm = req.query.q;
+  if (!searchTerm) {
+    return res.status(400).json({ error: "Search term is required" });
+  }
+
+  try {
+    const messages = await Message.find({
+      content: { $regex: searchTerm, $options: "i" }
+    })
+    .sort({ timestamp: -1 })
+    .select('_id senderId receiverId content timestamp read')
+    .lean();
+
+    res.json(messages);
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    // Pass to your error handler
+    next(error);
+  }
+});
+
+app.get('/api/search/listings', async (req, res, next) => {
+  const searchTerm = req.query.q || "";
+  const category = req.query.category;
+  
+  try {
+    
+    let query = {};
+    
+    if (category) {
+      query.category = category;
+    }
+
+    if (searchTerm.trim()) {
+      query.$or = [
+        { title: { $regex: searchTerm, $options: "i" } },
+        { description: { $regex: searchTerm, $options: "i" } }
+      ];
+    }
+    
+    const listings = await Listing.find(query).lean();
+    res.json(listings);
+  } catch (error) {
+    console.error("Error fetching listings:", error);
+    // Pass to your error handler
     next(error);
   }
 });

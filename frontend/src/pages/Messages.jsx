@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../auth/firebaseconfig';
 import { useNavigate } from 'react-router-dom';
+import useDebounce from '../hooks/useDebounce';
 
 // Use environment variable for API URL
 const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
@@ -14,6 +15,8 @@ function Messages() {
   const [newMessage, setNewMessage] = useState('');
   const [conversations, setConversations] = useState([]);
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [searchValue, setSearchValue] = useState('');
+  const debouncedValue = useDebounce(searchValue, 500);
   const messagesEndRef = useRef(null);
 
   const formatTimeAgo = (timestamp) => {
@@ -51,6 +54,39 @@ function Messages() {
       fetchConversations();
     }
   }, [user, loading, navigate]);
+
+     // Add effect for search
+     useEffect(() => {
+      if (!debouncedValue) {
+        fetchConversations();
+        return;
+      }
+  
+      const searchConversations = async () => {
+        try {
+          const response = await fetch(`${API_URL}/api/search/messages?q=${debouncedValue}`, {
+            credentials: 'include'
+          });
+          if (!response.ok) {
+            throw new Error(`Search failed: ${response.status}`);
+          }
+          const data = await response.json();
+          
+          // Filter conversations based on search results
+          const filteredConversations = conversations.filter(convo => 
+            data.some(msg => 
+              msg.senderId === convo.firebaseId || msg.receiverId === convo.firebaseId
+            )
+          );
+          
+          setConversations(filteredConversations);
+        } catch (err) {
+          console.error('Search error:', err);
+        }
+      };
+  
+      searchConversations();
+    }, [debouncedValue])
 
   const fetchConversations = async () => {
     try {
@@ -146,7 +182,15 @@ function Messages() {
       <div className="w-1/4 border-r border-gray-200 bg-white">
         <div className="p-4 pt-6">
           <h2 className="text-xl font-bold text-center mb-4 text-black">Conversations</h2>
-          <div className="mb-4">{/* search input omitted */}</div>
+          <div className="mb-4">
+          <input
+              type="text"
+              placeholder="Search conversations..."
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+          </div>
           <div className="space-y-2">
             {conversations.map((convo) => (
               <div
