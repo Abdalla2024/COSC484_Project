@@ -1,113 +1,169 @@
-const express = require('express')
-const mongoose = require('mongoose')
-const cors = require('cors')
-require('dotenv').config()
-const MONGODB_URI = process.env.MONGODB_URI
-const Listing = require('./models/listing')
-const User = require('./models/user')
-const listingRoutes = require('./routes/listing.route')
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const { connectToDatabase } = require('./config/mongodb');
+const Listing = require('./models/listing');
+const Message = require('./models/message');
+const User    = require('./models/user');
 
-const app = express()
+const app = express();
 
-// Configure CORS with specific options
-app.use((req, res, next) => {
-    console.log('Request origin:', req.headers.origin); // Log the origin
-    cors({
-        origin: function(origin, callback) {
-            console.log('Checking origin:', origin); // Log the origin being checked
-            callback(null, true); // Temporarily allow all origins
-        },
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-        credentials: true
-    })(req, res, next);
-});
+// Enable CORS for all routes
+app.use(cors());
+// Parse JSON and URL-encoded bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Add middleware
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-
-// User sync endpoint
-app.post('/api/users/sync', async (req, res) => {
+// Ensure MongoDB connection before handling any request
+app.use(async (req, res, next) => {
   try {
-    console.log('Received sync request with data:', req.body);
-    const { uid, email, displayName, photoURL } = req.body;
-    
-    // Check if user already exists
-    let user = await User.findOne({ email });
-    console.log('Existing user:', user);
-    
-    if (!user) {
-      console.log('Creating new user...');
-      // Create new user if doesn't exist
-      user = await User.create({
-        firebaseId: uid,
-        email,
-        displayName,
-        photoURL: photoURL || '',
-        username: email.split('@')[0],
-        listings: [],
-        reviews: [],
-        rating: 0,
-        favorites: [],
-        messages: []
-      });
-      console.log('New user created:', user);
-    } else {
-      console.log('Updating existing user...');
-      // Update existing user and ensure all fields exist
-      user.firebaseId = uid;
-      user.displayName = displayName;
-      user.photoURL = photoURL || '';
-      user.username = user.username || email.split('@')[0];
-      user.listings = user.listings || [];
-      user.reviews = user.reviews || [];
-      user.rating = user.rating || 0;
-      user.favorites = user.favorites || [];
-      user.messages = user.messages || [];
-      await user.save();
-      console.log('User updated:', user);
-    }
-    
-    res.status(200).json(user);
-  } catch (error) {
-    console.error('Error syncing user:', error);
-    res.status(500).json({ error: error.message });
+    await connectToDatabase();
+    next();
+  } catch (err) {
+    next(err);
   }
 });
 
-app.post('/api/listing', async (req, res) => {
-    try {
-        const listing = await Listing.create(req.body)
-        res.status(201).json(listing)
-    } catch (error) {
-        res.status(500).json({ error: error.message })
-    }
+// Root health-check route
+app.get('/', (req, res) => {
+  res.json({ message: 'API is running' });
 });
 
-// Use the listing routes
-app.use('/api/listing', listingRoutes)
+// ── Listing Endpoints 
+// GET all listings
+app.get('/api/listing', async (req, res, next) => {
+  try {
+    const allListings = await Listing.find().lean();
+    res.json(allListings);
+  } catch (error) {
+    next(error);
+  }
+});
 
-// Root route
-app.get('/', (req, res) => {
-    res.send('Hello World')
-})
+// GET one listing by ID
+app.get('/api/listing/:id', async (req, res, next) => {
+  try {
+    const listing = await Listing.findById(req.params.id).lean();
+    if (!listing) return res.status(404).json({ error: 'Listing not found' });
+    res.json(listing);
+  } catch (error) {
+    next(error);
+  }
+});
 
-// Error handling middleware
+// ── User Endpoints 
+// Sync (upsert) user on sign-in
+app.post('/api/users/sync', async (req, res, next) => {
+  try {
+    const { uid, email, displayName, photoURL } = req.body;
+    const filter = { firebaseId: uid };
+    const update = {
+      firebaseId: uid,
+      email,
+      displayName,
+      photoURL: photoURL || '',
+      username: email.split('@')[0]
+    };
+    const options = { upsert: true, new: true, setDefaultsOnInsert: true };
+    const user = await User.findOneAndUpdate(filter, update, options).lean();
+    res.json(user);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get user by Firebase UID
+app.get('/api/users/:userId', async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findOne({ firebaseId: userId }).lean();
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── Messaging Endpoints
+// Send a new message
+app.post('/api/messages', async (req, res, next) => {
+  try {
+    const msg = await Message.create(req.body);
+    res.status(201).json(msg);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get all conversations for a user
+app.get('/api/messages/user/:userId', async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const convos = await Message.find({
+      $or: [ { senderId: userId }, { receiverId: userId } ]
+    }).sort('timestamp').lean();
+    res.json(convos);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get one-to-one thread between two users
+app.get('/api/messages/:userId/:otherUserId', async (req, res, next) => {
+  try {
+    const { userId, otherUserId } = req.params;
+    const thread = await Message.find({
+      $or: [
+        { senderId: userId,   receiverId: otherUserId },
+        { senderId: otherUserId, receiverId: userId }
+      ]
+    }).sort('timestamp').lean();
+    res.json(thread);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Mark messages as read
+app.put('/api/messages/read/:userId/:otherUserId', async (req, res, next) => {
+  try {
+    const { userId, otherUserId } = req.params;
+    await Message.updateMany(
+      { senderId: otherUserId, receiverId: userId, read: false },
+      { read: true }
+    );
+    res.json({ success: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get unread message count
+app.get('/api/messages/unread/:userId/:otherUserId', async (req, res, next) => {
+  try {
+    const { userId, otherUserId } = req.params;
+    const count = await Message.countDocuments({
+      senderId: otherUserId,
+      receiverId: userId,
+      read: false
+    });
+    res.json({ count });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Global error handler
 app.use((err, req, res, next) => {
-    console.error(err.stack)
-    res.status(500).send('Something broke!')
-})
+  console.error('Error:', err);
+  res.status(500).json({ error: err.message || 'Internal server error' });
+});
 
-// Start server
-app.listen(3000, () => {
-    console.log('Server is running on http://localhost:3000')
-})
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
 
-mongoose.connect(MONGODB_URI)
-    .then(() => {
-        console.log('Connected to MongoDB')
-    })
-    .catch((err) => {
-        console.error('Error connecting to MongoDB', err)
-    })
+// Export app for serverless deployment
+module.exports = app;
