@@ -196,15 +196,22 @@ function Messages() {
       <div className="flex-1 flex flex-col">
         {selectedUser ? (
           <>
-            <div className="p-4 pt-8 border-b border-gray-200 flex items-center space-x-4">
-              {selectedUser.photoURL ? (
-                <img src={selectedUser.photoURL} alt={selectedUser.displayName} className="w-16 h-16 rounded-full" />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500 text-2xl">
-                    {selectedUser.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
-                  </span>
-                </div>
+            <div className="p-4 pt-8 border-b border-gray-200 flex flex-col items-center">
+  {selectedUser.photoURL ? (
+    <img
+      src={selectedUser.photoURL}
+      alt={selectedUser.displayName}
+      className="w-16 h-16 rounded-full"
+    />
+  ) : (
+    <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+      <span className="text-gray-500 text-2xl">
+        {selectedUser.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
+      </span>
+    </div>
+  )}
+  <h2 className="mt-2 text-lg font-semibold text-black">{selectedUser.displayName}</h2>
+</div>
               )}
               <h2 className="text-lg font-semibold text-black">{selectedUser.displayName}</h2>
             </div>
