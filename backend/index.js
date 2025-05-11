@@ -31,9 +31,49 @@ app.get('/', (req, res) => {
 // GET all listings
 app.get('/api/listing', async (req, res, next) => {
   try {
+    console.log('Fetching all listings');
     const allListings = await Listing.find().lean();
-    res.json(allListings);
+    
+    // Create a map of all unique seller IDs
+    const sellerIds = [...new Set(allListings.map(listing => 
+      listing.sellerId ? listing.sellerId.toString() : null).filter(Boolean))];
+    
+    console.log(`Found ${sellerIds.length} unique sellers in listings`);
+    
+    // Fetch all sellers in a single query
+    const sellers = await User.find({ _id: { $in: sellerIds } }).lean();
+    
+    // Create a map for quick seller lookup
+    const sellerMap = {};
+    sellers.forEach(seller => {
+      sellerMap[seller._id.toString()] = {
+        _id: seller._id.toString(),
+        username: seller.username || seller.email.split('@')[0],
+        displayName: seller.displayName || seller.username,
+        profileImage: seller.photoURL
+      };
+    });
+    
+    // Add seller info to each listing and convert ObjectIDs to strings
+    const processedListings = allListings.map(listing => {
+      // Convert ObjectIDs to strings
+      listing._id = listing._id.toString();
+      if (listing.sellerId) {
+        const sellerIdStr = listing.sellerId.toString();
+        listing.sellerId = sellerIdStr;
+        
+        // Add seller data if available
+        if (sellerMap[sellerIdStr]) {
+          listing.seller = sellerMap[sellerIdStr];
+        }
+      }
+      return listing;
+    });
+    
+    console.log(`Returning ${processedListings.length} listings with seller data`);
+    res.json(processedListings);
   } catch (err) {
+    console.error('Error fetching all listings:', err);
     next(err);
   }
 });
@@ -41,10 +81,52 @@ app.get('/api/listing', async (req, res, next) => {
 // GET one listing by ID
 app.get('/api/listing/:id', async (req, res, next) => {
   try {
+    console.log('Fetching listing with ID:', req.params.id);
     const listing = await Listing.findById(req.params.id).lean();
-    if (!listing) return res.status(404).json({ error: 'Listing not found' });
+    
+    if (!listing) {
+      return res.status(404).json({ error: 'Listing not found' });
+    }
+    
+    // Convert ObjectIDs to strings for better compatibility with the frontend
+    listing._id = listing._id.toString();
+    if (listing.sellerId) {
+      listing.sellerId = listing.sellerId.toString();
+    }
+    
+    // If we have a seller ID, fetch the seller information
+    if (listing.sellerId) {
+      console.log('Fetching seller with ID:', listing.sellerId);
+      try {
+        const seller = await User.findById(listing.sellerId).lean();
+        if (seller) {
+          // Add seller information to the listing response
+          listing.seller = {
+            _id: seller._id.toString(),
+            username: seller.username || seller.email.split('@')[0],
+            displayName: seller.displayName || seller.username,
+            email: seller.email,
+            photoURL: seller.photoURL,
+            profileImage: seller.photoURL
+          };
+          console.log('Found seller:', listing.seller.displayName);
+        } else {
+          console.log('Seller not found with ID:', listing.sellerId);
+          listing.seller = { _id: listing.sellerId };
+        }
+      } catch (sellerErr) {
+        console.error('Error fetching seller:', sellerErr);
+        // Don't fail the whole request if seller fetch fails
+        listing.seller = { _id: listing.sellerId };
+      }
+    } else {
+      console.log('No seller ID found for listing');
+    }
+    
+    console.log('Sending listing with seller data:', !!listing.seller);
     res.json(listing);
   } catch (err) {
+    console.error('Error fetching listing:', err);
     next(err);
   }
 });
