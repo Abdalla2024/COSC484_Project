@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../auth/firebaseconfig';
+import userService from '../services/userService';
 
 function SignIn() {
   const [email, setEmail] = useState('');
@@ -23,7 +24,25 @@ function SignIn() {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      // Authenticate with Firebase
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      // Sync user with backend and get MongoDB user data
+      try {
+        const userData = await userService.syncUser(firebaseUser);
+        console.log('User synced with backend:', userData);
+        
+        // Store user ID in localStorage
+        if (userData && userData._id) {
+          localStorage.setItem('userId', userData._id);
+          console.log('User ID stored in localStorage:', userData._id);
+        }
+      } catch (syncError) {
+        console.error('Error syncing user with backend:', syncError);
+      }
+      
+      // Navigate to home page
       navigate('/');
     } catch (error) {
       let errorMessage = "An error occurred during sign in";
