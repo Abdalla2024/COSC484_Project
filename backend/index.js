@@ -1,27 +1,14 @@
-// Serverless Express app with MongoDB connection
+// Ultra simplified Express app for Vercel
 const express = require('express');
 const cors = require('cors');
-const { connectToDatabase } = require('./config/mongodb');
 const app = express();
 
-// Configure CORS to allow all origins since we're having issues with specific origins
+// Basic CORS configuration - allow all origins
 app.use(cors({
-  origin: '*', // Allow all origins for now
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  credentials: true,
-  maxAge: 86400
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
-
-// Add explicit OPTIONS handler for preflight requests
-app.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400');
-  res.sendStatus(200);
-});
 
 // Basic middleware
 app.use(express.json());
@@ -32,273 +19,146 @@ app.get('/', (req, res) => {
   res.json({ message: 'API is running' });
 });
 
-// Listings endpoint - fetch real data from MongoDB
-app.get('/api/listing', async (req, res) => {
-  console.log('Fetching all listings from MongoDB');
-  try {
-    // Connect to the database
-    const { db, mongoose } = await connectToDatabase();
-    
-    // Get the Listing model (if not already imported)
-    const Listing = mongoose.models.Listing || 
-      mongoose.model('Listing', new mongoose.Schema({}, { strict: false }), 'listings');
-    
-    // Fetch all listings
-    const listings = await Listing.find().limit(20);
-    console.log(`Found ${listings.length} listings`);
-    
-    res.json(listings);
-  } catch (error) {
-    console.error('Error fetching listings:', error);
-    // Return mock data as fallback if MongoDB connection fails
-    const sampleListings = [
-      {
-        _id: "680fdb8fdc23fee2330354e2",
-        sellerId: "607d1f77bcf86cd799439011",
-        title: "Test Book",
-        description: "A brand-new test book.",
-        price: 19.99,
-        category: "Textbooks",
-        condition: "like new",
-        images: [],
-        deliveryMethod: "Both",
-        meetupLocation: "Campus Quad",
-        status: "active",
-        highestBid: 0,
-        bids: [],
-        createdAt: "2025-04-28T19:48:31.681+00:00",
-        updatedAt: "2025-04-28T19:48:31.681+00:00"
-      },
-      {
-        _id: "6812e800dd41b1024c343259",
-        sellerId: "65f3b1234567890123456789",
-        title: "z d ",
-        description: "csdv",
-        price: 418,
-        category: "Clothing",
-        condition: "poor",
-        images: [],
-        deliveryMethod: "Shipping",
-        status: "active",
-        highestBid: 0,
-        bids: [],
-        createdAt: "2025-05-01T03:18:24.873+00:00",
-        updatedAt: "2025-05-01T03:18:24.873+00:00"
-      },
-      {
-        _id: "6813e8b5a89fd1e748f61e20",
-        sellerId: "65f3b1234567890123456789",
-        title: "ps5 controller",
-        description: "never used still have the box",
-        price: 81,
-        category: "Electronics",
-        condition: "new",
-        images: [],
-        deliveryMethod: "Shipping",
-        status: "active",
-        highestBid: 0,
-        bids: [],
-        createdAt: "2025-05-01T21:33:41.097+00:00",
-        updatedAt: "2025-05-01T21:33:41.097+00:00"
-      },
-      {
-        _id: "6817b6f417b2d4103c25b832",
-        sellerId: "65f3b1234567890123456789",
-        title: "Crayons",
-        description: "Just a box of 24 crayons",
-        price: 10,
-        category: "Art Supplies",
-        condition: "new",
-        images: [],
-        deliveryMethod: "Meetup",
-        meetupLocation: "Union",
-        status: "active",
-        highestBid: 0,
-        bids: [],
-        createdAt: "2025-05-04T18:50:28.689+00:00",
-        updatedAt: "2025-05-04T18:50:28.689+00:00"
-      },
-      {
-        _id: "6813e57ea89fd1e748f61e1a",
-        sellerId: "65f3b1234567890123456789",
-        title: "algebra 1 textbook",
-        description: "just like new",
-        price: 72,
-        category: "Textbooks",
-        condition: "fair",
-        images: [],
-        deliveryMethod: "Shipping",
-        status: "active",
-        highestBid: 0,
-        bids: [],
-        createdAt: "2025-05-01T21:19:58.313+00:00",
-        updatedAt: "2025-05-01T21:19:58.313+00:00"
-      }
-    ];
-    
-    res.json(sampleListings);
-  }
-});
-
-app.get('/api/listing/:id', async (req, res) => {
-  const { id } = req.params;
-  console.log(`Fetching listing with id: ${id}`);
+// Mock listings endpoint
+app.get('/api/listing', (req, res) => {
+  console.log('Fetching mock listings');
   
-  try {
-    // Connect to the database
-    const { db, mongoose } = await connectToDatabase();
-    
-    // Get the Listing model
-    const Listing = mongoose.models.Listing || 
-      mongoose.model('Listing', new mongoose.Schema({}, { strict: false }), 'listings');
-    
-    // Find the listing by ID
-    const listing = await Listing.findById(id);
-    
-    if (!listing) {
-      return res.status(404).json({ error: 'Listing not found' });
+  // Return mock listings
+  const mockListings = [
+    {
+      _id: "680fdb8fdc23fee2330354e2",
+      sellerId: "607d1f77bcf86cd799439011",
+      title: "Test Book",
+      description: "A brand-new test book.",
+      price: 19.99,
+      category: "Textbooks",
+      condition: "like new",
+      images: [],
+      deliveryMethod: "Both",
+      meetupLocation: "Campus Quad",
+      status: "active",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      _id: "6812e800dd41b1024c343259",
+      sellerId: "65f3b1234567890123456789",
+      title: "PS5 Controller",
+      description: "Brand new controller",
+      price: 59.99,
+      category: "Electronics",
+      condition: "new",
+      images: [],
+      deliveryMethod: "Shipping",
+      status: "active",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      _id: "6813e8b5a89fd1e748f61e20",
+      sellerId: "65f3b1234567890123456789",
+      title: "Math Textbook",
+      description: "Calculus textbook for MATH 201",
+      price: 45.00,
+      category: "Textbooks",
+      condition: "good",
+      images: [],
+      deliveryMethod: "Meetup",
+      meetupLocation: "Library",
+      status: "active",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }
-    
-    res.json(listing);
-  } catch (error) {
-    console.error(`Error fetching listing ${id}:`, error);
-    res.status(500).json({ error: 'Failed to fetch listing' });
-  }
+  ];
+  
+  res.json(mockListings);
 });
 
-// User sync endpoint
-app.post('/api/users/sync', async (req, res) => {
-  try {
-    console.log('Received sync request with data:', req.body);
-    const { uid, email, displayName, photoURL } = req.body;
-    
-    // Connect to the database
-    const { db, mongoose } = await connectToDatabase();
-    
-    // Get the User model
-    const User = mongoose.models.User || 
-      mongoose.model('User', new mongoose.Schema({}, { strict: false }), 'users');
-    
-    // Check if user already exists
-    let user = await User.findOne({ email });
-    
-    if (!user) {
-      // Create new user
-      user = await User.create({
-        firebaseId: uid,
-        email,
-        displayName,
-        photoURL: photoURL || '',
-        username: email.split('@')[0],
-        listings: [],
-        reviews: [],
-        rating: 0,
-        favorites: [],
-        messages: []
-      });
-    } else {
-      // Update existing user
-      user.firebaseId = uid;
-      user.displayName = displayName;
-      user.photoURL = photoURL || '';
-      await user.save();
-    }
-    
-    res.status(200).json(user);
-  } catch (error) {
-    console.error('Error syncing user:', error);
-    res.status(500).json({ error: error.message });
-  }
+// Mock listing detail endpoint
+app.get('/api/listing/:id', (req, res) => {
+  const { id } = req.params;
+  console.log(`Fetching mock listing with id: ${id}`);
+  
+  res.json({
+    _id: id,
+    title: "Sample Listing",
+    description: "This is a sample listing",
+    price: 29.99,
+    category: "Electronics",
+    condition: "good",
+    sellerId: "user123",
+    images: [],
+    deliveryMethod: "Both",
+    meetupLocation: "Student Center",
+    status: "active",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
 });
 
-// Add minimal routes for the rest of the endpoints
-// (We can expand these as needed)
+// Mock user sync endpoint
+app.post('/api/users/sync', (req, res) => {
+  const { uid, email, displayName, photoURL } = req.body;
+  console.log(`Mock syncing user: ${displayName} (${email})`);
+  
+  res.json({
+    _id: "user123",
+    firebaseId: uid,
+    email,
+    displayName,
+    photoURL: photoURL || '',
+    username: email ? email.split('@')[0] : 'user',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
+});
 
-app.get('/api/users/:userId', async (req, res) => {
+// Mock user detail endpoint
+app.get('/api/users/:userId', (req, res) => {
   const { userId } = req.params;
-  try {
-    // Connect to the database
-    const { db, mongoose } = await connectToDatabase();
-    
-    // Get the User model
-    const User = mongoose.models.User || 
-      mongoose.model('User', new mongoose.Schema({}, { strict: false }), 'users');
-    
-    // Find user by ID or Firebase ID
-    const user = await User.findOne({
-      $or: [
-        { _id: userId },
-        { firebaseId: userId }
-      ]
-    });
-    
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    res.json(user);
-  } catch (error) {
-    console.error(`Error fetching user ${userId}:`, error);
-    res.status(500).json({ error: 'Failed to fetch user' });
-  }
+  console.log(`Fetching mock user with id: ${userId}`);
+  
+  res.json({
+    _id: userId,
+    firebaseId: userId,
+    displayName: "Mock User",
+    email: "mockuser@example.com",
+    photoURL: "",
+    username: "mockuser"
+  });
 });
 
-// Messages endpoints
-app.post('/api/messages', (req, res) => {
-  try {
-    console.log('Creating message with data:', req.body);
-    const { senderId, receiverId, content } = req.body;
-    
-    const message = {
-      _id: Math.random().toString(36).substring(7),
-      senderId,
-      receiverId,
-      content,
-      read: false,
-      timestamp: new Date()
-    };
-    
-    res.status(201).json(message);
-  } catch (error) {
-    console.error('Error creating message:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
+// Mock messages endpoints
 app.get('/api/messages/user/:userId', (req, res) => {
-  const userId = req.params.userId;
-  console.log(`Getting messages for user: ${userId}`);
   res.json([]);
 });
 
 app.get('/api/messages/:userId/:otherUserId', (req, res) => {
-  const { userId, otherUserId } = req.params;
-  console.log(`Getting conversation between ${userId} and ${otherUserId}`);
   res.json([]);
 });
 
 app.put('/api/messages/read/:userId/:otherUserId', (req, res) => {
-  const { userId, otherUserId } = req.params;
-  console.log(`Marking messages as read for ${userId} from ${otherUserId}`);
   res.json({ success: true });
 });
 
 app.get('/api/messages/unread/:userId/:otherUserId', (req, res) => {
-  const { userId, otherUserId } = req.params;
-  console.log(`Getting unread count between ${userId} and ${otherUserId}`);
   res.json({ count: 0 });
 });
 
-app.get('/api/messages/unread/count/:userId', (req, res) => {
-  const userId = req.params.userId;
-  console.log(`Getting total unread count for user: ${userId}`);
-  res.json({ count: 0 });
+app.post('/api/messages', (req, res) => {
+  const message = {
+    _id: Math.random().toString(36).substring(7),
+    ...req.body,
+    read: false,
+    timestamp: new Date().toISOString()
+  };
+  res.status(201).json(message);
 });
 
-// Error handling middleware
+// Basic error handler
 app.use((err, req, res, next) => {
   console.error('Error:', err);
-  res.status(500).json({ error: err.message });
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 // For local development
