@@ -3,6 +3,7 @@ import { FaCommentAlt, FaPlus, FaUserCircle, FaBars } from 'react-icons/fa'
 import { useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { auth } from '../auth/firebaseconfig'
+import { signOut } from 'firebase/auth'
 
 function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -18,10 +19,24 @@ function Navbar() {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleSignOut = () => {
-    setIsDropdownOpen(false);
-    setIsMobileMenuOpen(false);
-    navigate('/signin');
+  const handleSignOut = async () => {
+    try {
+      // Sign out from Firebase
+      await signOut(auth);
+      
+      // Clear user data from localStorage
+      localStorage.removeItem('userId');
+      console.log('User signed out and localStorage cleared');
+      
+      // Close menus
+      setIsDropdownOpen(false);
+      setIsMobileMenuOpen(false);
+      
+      // Navigate to sign in page
+      navigate('/signin');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   const getUserInitials = () => {
