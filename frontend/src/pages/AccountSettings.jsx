@@ -18,6 +18,8 @@ function AccountSettings() {
     return user.displayName.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
+  console.log("user-information", user);
+
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
@@ -28,8 +30,8 @@ function AccountSettings() {
         {/* Profile Picture Section */}
         <div className="flex flex-col items-center mb-8">
           {user?.photoURL ? (
-            <img 
-              src={user.photoURL} 
+            <img
+              src={user.photoURL}
               alt={user.displayName}
               className="w-24 h-24 rounded-full mb-4"
             />
@@ -49,12 +51,12 @@ function AccountSettings() {
             <h2 className="text-lg font-semibold mb-2 text-black">Email</h2>
             <p className="text-gray-600">{user?.email}</p>
           </div>
-          
+
           <div className="border-b pb-4 text-center">
             <h2 className="text-lg font-semibold mb-2 text-black">User ID</h2>
             <p className="text-gray-600 break-all">{user?.uid}</p>
           </div>
-          
+
           <div className="border-b pb-4 text-center">
             <h2 className="text-lg font-semibold mb-2 text-black">Display Name</h2>
             <p className="text-gray-600">{user?.displayName || 'Not set'}</p>

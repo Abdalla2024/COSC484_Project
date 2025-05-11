@@ -15,7 +15,7 @@ const mockUser = {
       price: 75.00,
       condition: 'Like New',
       category: 'Textbooks',
-      images: ['https://via.placeholder.com/400x300'],
+      images: ['https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'],
       createdAt: new Date().toISOString(),
       status: 'active'
     }
@@ -42,14 +42,14 @@ function Profile() {
             />
             <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <span className="text-xl font-semibold text-black">{user.username}</span>
             <div className="flex items-center">
               <span className="text-[#FFB800] text-xl">★</span>
               <span className="text-xl font-medium ml-1 text-black">{user.rating}</span>
             </div>
-            <Link 
+            <Link
               to={`/reviews/${user._id}`}
               className="text-blue-600 hover:underline"
             >

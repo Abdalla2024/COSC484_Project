@@ -59,7 +59,7 @@ function UserProfile() {
                 alt={mockUser.username}
                 className="w-24 h-24 rounded-full object-cover"
                 onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/150?text=User';
+                  e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
                 }}
               />
               <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
@@ -69,7 +69,7 @@ function UserProfile() {
               <p className="text-gray-600">Member since {mockUser.joinedDate}</p>
               <div className="mt-2">
                 <StarRating rating={mockUser.rating} />
-                <Link 
+                <Link
                   to={`/reviews/${userId}`}
                   className="text-[#FFB800] hover:text-[#FFB800]/80 text-sm"
                 >
@@ -84,21 +84,19 @@ function UserProfile() {
         <div className="flex gap-4 mb-6">
           <button
             onClick={() => setActiveTab('listings')}
-            className={`px-4 py-2 rounded-lg font-medium ${
-              activeTab === 'listings'
+            className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'listings'
                 ? 'bg-[#FFB800] text-white'
                 : 'bg-white text-gray-600 hover:bg-gray-50'
-            }`}
+              }`}
           >
             Listings
           </button>
           <button
             onClick={() => setActiveTab('reviews')}
-            className={`px-4 py-2 rounded-lg font-medium ${
-              activeTab === 'reviews'
+            className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'reviews'
                 ? 'bg-[#FFB800] text-white'
                 : 'bg-white text-gray-600 hover:bg-gray-50'
-            }`}
+              }`}
           >
             Reviews
           </button>
@@ -144,7 +142,7 @@ function UserProfile() {
         {/* Reviews Tab Content */}
         {activeTab === 'reviews' && (
           <div className="bg-white rounded-lg shadow-md p-6">
-            <Link 
+            <Link
               to={`/reviews/${userId}`}
               className="block text-center text-[#FFB800] hover:text-[#FFB800]/80"
             >
