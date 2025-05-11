@@ -43,7 +43,94 @@ app.get('/', (req, res) => {
 // Listings endpoint
 app.get('/api/listing', (req, res) => {
   console.log('Fetching all listings');
-  res.json([]);
+  
+  // Return sample listings based on the provided data
+  const sampleListings = [
+    {
+      _id: "680fdb8fdc23fee2330354e2",
+      sellerId: "607d1f77bcf86cd799439011",
+      title: "Test Book",
+      description: "A brand-new test book.",
+      price: 19.99,
+      category: "Textbooks",
+      condition: "like new",
+      images: [],
+      deliveryMethod: "Both",
+      meetupLocation: "Campus Quad",
+      status: "active",
+      highestBid: 0,
+      bids: [],
+      createdAt: "2025-04-28T19:48:31.681+00:00",
+      updatedAt: "2025-04-28T19:48:31.681+00:00"
+    },
+    {
+      _id: "6812e800dd41b1024c343259",
+      sellerId: "65f3b1234567890123456789",
+      title: "z d ",
+      description: "csdv",
+      price: 418,
+      category: "Clothing",
+      condition: "poor",
+      images: [],
+      deliveryMethod: "Shipping",
+      status: "active",
+      highestBid: 0,
+      bids: [],
+      createdAt: "2025-05-01T03:18:24.873+00:00",
+      updatedAt: "2025-05-01T03:18:24.873+00:00"
+    },
+    {
+      _id: "6813e8b5a89fd1e748f61e20",
+      sellerId: "65f3b1234567890123456789",
+      title: "ps5 controller",
+      description: "never used still have the box",
+      price: 81,
+      category: "Electronics",
+      condition: "new",
+      images: [],
+      deliveryMethod: "Shipping",
+      status: "active",
+      highestBid: 0,
+      bids: [],
+      createdAt: "2025-05-01T21:33:41.097+00:00",
+      updatedAt: "2025-05-01T21:33:41.097+00:00"
+    },
+    {
+      _id: "6817b6f417b2d4103c25b832",
+      sellerId: "65f3b1234567890123456789",
+      title: "Crayons",
+      description: "Just a box of 24 crayons",
+      price: 10,
+      category: "Art Supplies",
+      condition: "new",
+      images: [],
+      deliveryMethod: "Meetup",
+      meetupLocation: "Union",
+      status: "active",
+      highestBid: 0,
+      bids: [],
+      createdAt: "2025-05-04T18:50:28.689+00:00",
+      updatedAt: "2025-05-04T18:50:28.689+00:00"
+    },
+    {
+      _id: "6813e57ea89fd1e748f61e1a",
+      sellerId: "65f3b1234567890123456789",
+      title: "algebra 1 textbook",
+      description: "just like new",
+      price: 72,
+      category: "Textbooks",
+      condition: "fair",
+      images: [],
+      deliveryMethod: "Shipping",
+      status: "active",
+      highestBid: 0,
+      bids: [],
+      createdAt: "2025-05-01T21:19:58.313+00:00",
+      updatedAt: "2025-05-01T21:19:58.313+00:00"
+    }
+  ];
+  
+  res.json(sampleListings);
 });
 
 app.get('/api/listing/:id', (req, res) => {
