@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 
 // Use environment variable for API URL
 const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
-console.log('Using API_URL in Messages:', API_URL);
 
 function Messages() {
   const [user, loading] = useAuthState(auth);
@@ -21,18 +20,13 @@ function Messages() {
     const now = new Date();
     const messageTime = new Date(timestamp);
     const diffInHours = Math.floor((now - messageTime) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) {
-      return 'just now';
-    } else if (diffInHours < 24) {
-      return `${diffInHours}h ago`;
-    } else {
-      return `${Math.floor(diffInHours / 24)}d ago`;
-    }
+    if (diffInHours < 1) return 'just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    return `${Math.floor(diffInHours / 24)}d ago`;
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -40,7 +34,6 @@ function Messages() {
       navigate('/signin');
       return;
     }
-
     if (user) {
       // Sync user and fetch conversations
       const syncUser = async () => {
@@ -62,27 +55,22 @@ function Messages() {
 
   const fetchConversations = async () => {
     try {
-      const messagesResponse = await fetch(`${API_URL}/api/messages/user/${user.uid}`);
-      const allMessages = await messagesResponse.json();
+      const messagesRes = await fetch(`${API_URL}/api/messages/user/${user.uid}`);
+      const allMessages = await messagesRes.json();
 
-      // Extract unique other-user IDs
       const uniqueUserIds = Array.from(
-        new Set(
-          allMessages.map(m => (m.senderId === user.uid ? m.receiverId : m.senderId))
-        )
+        new Set(allMessages.map(m => (m.senderId === user.uid ? m.receiverId : m.senderId)))
       );
 
       const convos = [];
       const counts = {};
 
       for (const otherId of uniqueUserIds) {
-        // Filter messages for this conversation and pick the last one
         const userMsgs = allMessages.filter(
           m => m.senderId === otherId || m.receiverId === otherId
         );
         const lastMsg = userMsgs.length ? userMsgs[userMsgs.length - 1] : null;
 
-        // Fetch user details and unread count
         const [userRes, countRes] = await Promise.all([
           fetch(`${API_URL}/api/users/${otherId}`),
           fetch(`${API_URL}/api/messages/unread/${user.uid}/${otherId}`)
@@ -100,7 +88,7 @@ function Messages() {
         counts[otherId] = count;
       }
 
-      // Sort conversations by most recent message first
+      // Sort by newest conversation
       convos.sort((a, b) => {
         if (!a.lastMessage) return 1;
         if (!b.lastMessage) return -1;
@@ -117,12 +105,15 @@ function Messages() {
   const fetchMessages = async () => {
     if (!selectedUser) return;
     try {
-      const response = await fetch(
+      const res = await fetch(
         `${API_URL}/api/messages/${user.uid}/${selectedUser.firebaseId}`
       );
-      const msgs = await response.json();
+      const msgs = await res.json();
       setMessages(msgs);
-      await fetch(`${API_URL}/api/messages/read/${user.uid}/${selectedUser.firebaseId}`, { method: 'PUT' });
+      await fetch(
+        `${API_URL}/api/messages/read/${user.uid}/${selectedUser.firebaseId}`,
+        { method: 'PUT' }
+      );
       fetchConversations();
       setTimeout(scrollToBottom, 100);
     } catch (error) {
@@ -146,8 +137,8 @@ function Messages() {
     fetchMessages();
   };
 
-  const handleSelectUser = (user) => {
-    setSelectedUser(user);
+  const handleSelectUser = (convo) => {
+    setSelectedUser(convo);
     fetchMessages();
   };
 
@@ -165,16 +156,49 @@ function Messages() {
       <div className="w-1/4 border-r border-gray-200 bg-white">
         <div className="p-4 pt-6">
           <h2 className="text-xl font-bold text-center mb-4 text-black">Conversations</h2>
-          <div className="mb-4">...
-            {/* input and other UI omitted for brevity */}
+          <div className="mb-4">
+            {/* search input omitted for brevity */}
           </div>
           <div className="space-y-2">
             {conversations.map((convo) => (
-              <div key={convo.firebaseId} onClick={() => handleSelectUser(convo)} className=...>
-                {/* avatar, name, time */}
-                <p className="text-sm text-gray-600 truncate">
-                  {convo.lastMessage ? convo.lastMessage.content : 'No messages yet'}
-                </p>
+              <div
+                key={convo.firebaseId}
+                onClick={() => handleSelectUser(convo)}
+                className={`p-3 rounded-lg cursor-pointer hover:bg-gray-100 ${
+                  selectedUser?.firebaseId === convo.firebaseId ? 'bg-gray-100' : ''
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  {convo.photoURL ? (
+                    <img
+                      src={convo.photoURL}
+                      alt={convo.displayName}
+                      className="w-12 h-12 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-500 text-lg">
+                        {convo.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-semibold truncate text-black">{convo.displayName}</h3>
+                        {unreadCounts[convo.firebaseId] > 0 && (
+                          <div className="w-2 h-2 rounded-full bg-blue-500" />
+                        )}
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {convo.lastMessage ? formatTimeAgo(convo.lastMessage.timestamp) : ''}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 truncate">
+                      {convo.lastMessage ? convo.lastMessage.content : 'No messages yet'}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
