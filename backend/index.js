@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -6,25 +5,7 @@ const { connectToDatabase } = require('./config/mongodb');
 const Listing = require('./models/listing');
 const Message = require('./models/message');
 const User    = require('./models/user');
-=======
-const express = require('express')
-const mongoose = require('mongoose')
-const cors = require('cors')
-require('dotenv').config()
-const MONGODB_URI = process.env.MONGODB_URI
-const Listing = require('./models/listing')
-const User = require('./models/user')
-const listingRoutes = require('./routes/listing.route')
-<<<<<<< HEAD
-const checkoutRoutes = require('./routes/checkout.route');
-const conversationRoutes = require('./routes/conversation.route')
-=======
-const messageRoutes = require('./routes/message.route')
-const userRoutes = require('./routes/user.route')
 const searchRoutes  = require('./routes/search.route')
->>>>>>> 9407fe1 (Added search functionality for messaging and listings)
-
->>>>>>> ddb55d6 (Starting stripe implementation in backend)
 
 const app = express();
 
@@ -34,17 +15,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-<<<<<<< HEAD
 // Ensure MongoDB connection before handling any request
 app.use(async (req, res, next) => {
-=======
-// Add middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// User sync endpoint
-app.post('/api/users/sync', async (req, res) => {
->>>>>>> 76f64ae (Finally got stripe payment working through click of button)
   try {
     await connectToDatabase();
     next();
@@ -58,7 +30,6 @@ app.get('/', (req, res) => {
   res.json({ message: 'API is running' });
 });
 
-<<<<<<< HEAD
 // ── Listing Endpoints 
 // GET all listings
 app.get('/api/listing', async (req, res, next) => {
@@ -70,7 +41,7 @@ app.get('/api/listing', async (req, res, next) => {
   }
 });
 
-<<<<<<< HEAD
+
 // GET one listing by ID
 app.get('/api/listing/:id', async (req, res, next) => {
   try {
@@ -81,25 +52,12 @@ app.get('/api/listing/:id', async (req, res, next) => {
     next(error);
   }
 });
-=======
-// checkout route
-app.use('/api/checkout', checkoutRoutes);
-
-app.use('/api/conversation', conversationRoutes)
-=======
-// Use the routes
-app.use('/api/listing', listingRoutes)
-app.use('/api/messages', messageRoutes)
-app.use('/api/users', userRoutes)
-app.use('/api/search', searchRoutes)
->>>>>>> 9407fe1 (Added search functionality for messaging and listings)
 
 
 // Root route
 app.get('/', (req, res) => {
     res.send('Hello World')
 })
->>>>>>> ddb55d6 (Starting stripe implementation in backend)
 
 // ── User Endpoints 
 // Sync (upsert) user on sign-in
@@ -199,6 +157,57 @@ app.get('/api/messages/unread/:userId/:otherUserId', async (req, res, next) => {
     });
     res.json({ count });
   } catch (error) {
+    next(error);
+  }
+});
+
+//--Search Functionality 
+app.get('/api/search/messages', async (req, res, next) => {
+  const searchTerm = req.query.q;
+  if (!searchTerm) {
+    return res.status(400).json({ error: "Search term is required" });
+  }
+
+  try {
+    const messages = await Message.find({
+      content: { $regex: searchTerm, $options: "i" }
+    })
+    .sort({ timestamp: -1 })
+    .select('_id senderId receiverId content timestamp read')
+    .lean();
+
+    res.json(messages);
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    // Pass to your error handler
+    next(error);
+  }
+});
+
+app.get('/api/search/listings', async (req, res, next) => {
+  const searchTerm = req.query.q || "";
+  const category = req.query.category;
+  
+  try {
+    
+    let query = {};
+    
+    if (category) {
+      query.category = category;
+    }
+
+    if (searchTerm.trim()) {
+      query.$or = [
+        { title: { $regex: searchTerm, $options: "i" } },
+        { description: { $regex: searchTerm, $options: "i" } }
+      ];
+    }
+    
+    const listings = await Listing.find(query).lean();
+    res.json(listings);
+  } catch (error) {
+    console.error("Error fetching listings:", error);
+    // Pass to your error handler
     next(error);
   }
 });

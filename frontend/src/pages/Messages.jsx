@@ -14,12 +14,9 @@ function Messages() {
   const [newMessage, setNewMessage] = useState('');
   const [conversations, setConversations] = useState([]);
   const [unreadCounts, setUnreadCounts] = useState({});
-<<<<<<< HEAD
-=======
   const [searchValue, setSearchValue] = useState('');
   const debouncedValue = useDebounce(searchValue, 500);
   const messagesEndRef = useRef(null);
->>>>>>> 9407fe1 (Added search functionality for messaging and listings)
 
   const formatTimeAgo = (timestamp) => {
     const now = new Date();
@@ -260,36 +257,6 @@ function Messages() {
             />
           </div>
           <div className="space-y-2">
-<<<<<<< HEAD
-            {conversations.map((convo) => (
-              <div
-                key={convo.firebaseId}
-                className={`p-3 rounded-lg cursor-pointer hover:bg-gray-100 ${
-                  selectedUser?.firebaseId === convo.firebaseId ? 'bg-gray-100' : ''
-                }`}
-                onClick={() => handleSelectUser(convo)}
-              >
-                <div className="flex items-center space-x-3">
-                  {convo.photoURL ? (
-                    <img
-                      src={convo.photoURL}
-                      alt={convo.displayName}
-                      className="w-12 h-12 rounded-full"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-500 text-lg">
-                        {convo.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-semibold truncate text-black">{convo.displayName}</h3>
-                      <span className="text-xs text-gray-500">
-                        {convo.lastMessage ? formatTimeAgo(convo.lastMessage.timestamp) : ''}
-                      </span>
-=======
             {conversations.length === 0 ? (
               <div className="text-center text-gray-500 py-4">
                 {searchValue ? 'No conversations found' : 'No conversations yet'}
@@ -332,7 +299,6 @@ function Messages() {
                       <p className="text-sm text-gray-600 truncate">
                         {convo.lastMessage ? convo.lastMessage.content : 'No messages yet'}
                       </p>
->>>>>>> 9407fe1 (Added search functionality for messaging and listings)
                     </div>
                   </div>
                 </div>

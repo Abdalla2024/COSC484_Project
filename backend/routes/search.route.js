@@ -17,7 +17,7 @@ router.get('/messages', async (req, res) => {
     const messages = await Message.aggregate([
       {
         $match: {
-          content: { $regex: searchTerm, $options: "i" }
+      content: { $regex: searchTerm, $options: "i" }
         }
       },
       { $sort: { timestamp: -1 } },
@@ -41,33 +41,33 @@ router.get('/messages', async (req, res) => {
 });
 
 router.get('/listings', async (req, res) => {
-    const searchTerm = req.query.q || "";
-    const category = req.query.category;
+  const searchTerm = req.query.q || "";
+  const category = req.query.category;
   
-    try {
+  try {
       const db = mongoose.connection.db.collection('listings');
   
-      let query = {};
-  
+    let query = {};
+    
       // If a category is provided, include it in the query
-      if (category) {
-        query.category = category;
-      }
-  
-      // If a search term is provided, apply the $or condition
-      if (searchTerm.trim()) {
-        query.$or = [
-          { title: { $regex: searchTerm, $options: "i" } },
-          { description: { $regex: searchTerm, $options: "i" } }
-        ];
-      }
-  
-      const listings = await db.find(query).toArray();
-      res.json(listings);
-    } catch (error) {
-      console.error("Error fetching listings:", error);
-      res.status(500).json({ error: error.message });
+    if (category) {
+      query.category = category;
     }
-  });
-  
+    
+      // If a search term is provided, apply the $or condition
+    if (searchTerm.trim()) {
+      query.$or = [
+        { title: { $regex: searchTerm, $options: "i" } },
+        { description: { $regex: searchTerm, $options: "i" } }
+      ];
+    }
+    
+      const listings = await db.find(query).toArray();
+    res.json(listings);
+  } catch (error) {
+    console.error("Error fetching listings:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
