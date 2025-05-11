@@ -6,6 +6,8 @@ const { connectToDatabase } = require('./config/mongodb');
 const Listing = require('./models/listing');
 const Message = require('./models/message');
 const User    = require('./models/user');
+const Review  = require('./models/review');
+const reviewRoutes = require('./routes/review.route');
 
 const app = express();
 app.use(cors());
@@ -26,6 +28,9 @@ app.use(async (req, res, next) => {
 app.get('/', (req, res) => {
   res.json({ message: 'API is running' });
 });
+
+// Mount review routes
+app.use('/api/reviews', reviewRoutes);
 
 // ── LISTING ENDPOINTS ───────────────────────────────────────────────────────────
 // GET all listings
