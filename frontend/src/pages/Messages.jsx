@@ -82,7 +82,6 @@ function Messages() {
         counts[otherId] = count;
       }
 
-      // Sort by newest lastMessage first
       convos.sort((a, b) => {
         if (!a.lastMessage) return 1;
         if (!b.lastMessage) return -1;
@@ -131,9 +130,7 @@ function Messages() {
     fetchMessages();
   };
 
-  const handleSelectUser = (convo) => {
-    setSelectedUser(convo);
-  };
+  const handleSelectUser = (convo) => setSelectedUser(convo);
 
   useEffect(() => {
     if (selectedUser) fetchMessages();
@@ -161,7 +158,11 @@ function Messages() {
               >
                 <div className="flex items-center space-x-3">
                   {convo.photoURL ? (
-                    <img src={convo.photoURL} alt={convo.displayName} className="w-12 h-12 rounded-full" />
+                    <img
+                      src={convo.photoURL}
+                      alt={convo.displayName}
+                      className="w-12 h-12 rounded-full"
+                    />
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
                       <span className="text-gray-500 text-lg">
@@ -195,27 +196,27 @@ function Messages() {
       {/* Chat Area */}
       <div className="flex-1 flex flex-col">
         {selectedUser ? (
-  <>
-          <>
+          <div className="flex flex-col flex-1">
+            {/* Header */}
             <div className="p-4 pt-8 border-b border-gray-200 flex flex-col items-center">
-  {selectedUser.photoURL ? (
-    <img
-      src={selectedUser.photoURL}
-      alt={selectedUser.displayName}
-      className="w-16 h-16 rounded-full"
-    />
-  ) : (
-    <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-      <span className="text-gray-500 text-2xl">
-        {selectedUser.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
-      </span>
-    </div>
-  )}
-  <h2 className="mt-2 text-lg font-semibold text-black">{selectedUser.displayName}</h2>
-</div>
+              {selectedUser.photoURL ? (
+                <img
+                  src={selectedUser.photoURL}
+                  alt={selectedUser.displayName}
+                  className="w-16 h-16 rounded-full"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500 text-2xl">
+                    {selectedUser.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  </span>
+                </div>
               )}
-              <h2 className="text-lg font-semibold text-black">{selectedUser.displayName}</h2>
+              <h2 className="mt-2 text-lg font-semibold text-black">
+                {selectedUser.displayName}
+              </h2>
             </div>
+            {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(100vh-16rem)]">
               {messages.map((message) => (
                 <div
@@ -225,18 +226,23 @@ function Messages() {
                   }`}
                 >
                   <div className={`max-w-xs p-3 rounded-lg ${
-                    message.senderId === user.uid ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'
-                  }`}
-                  >
+                    message.senderId === user.uid
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-800'
+                  }`}>
                     <p className="text-sm text-left">{message.content}</p>
                     <p className="text-xs mt-1 opacity-80 text-right">
-                      {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(message.timestamp).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
                     </p>
                   </div>
                 </div>
               ))}
               <div ref={messagesEndRef} />
             </div>
+            {/* Input */}
             <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200">
               <div className="flex space-x-2">
                 <input
@@ -254,8 +260,7 @@ function Messages() {
                 </button>
               </div>
             </form>
-  </>
-
+          </div>
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
             Select a conversation to start messaging
