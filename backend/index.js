@@ -27,19 +27,35 @@ connectDB().catch(error => {
   process.exit(1);
 });
 
-// Configure CORS with specific options
-app.use((req, res, next) => {
-    console.log('Request origin:', req.headers.origin); // Log the origin
-    cors({
-        origin: function(origin, callback) {
-            console.log('Checking origin:', origin); // Log the origin being checked
-            callback(null, true); // Temporarily allow all origins
-        },
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-        credentials: true
-    })(req, res, next);
-});
+// Configure CORS properly
+const allowedOrigins = [
+  'https://cosc-484-project-front.vercel.app',
+  'https://cosc-484-project-front-git-7cbc3b-abdalla-abdelmagids-projects.vercel.app',
+  'http://localhost:5173'
+];
+
+app.use(cors({
+  origin: function(origin, callback) {
+    console.log('Request origin:', origin);
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('Origin not allowed by CORS:', origin);
+      callback(null, true); // Allow all origins for now while debugging
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  credentials: true,
+  maxAge: 86400
+}));
+
+// Handle preflight requests explicitly
+app.options('*', cors());
 
 // Add middleware
 app.use(express.json())
