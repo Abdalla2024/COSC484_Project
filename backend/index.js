@@ -49,6 +49,28 @@ app.get('/api/listing/:id', async (req, res, next) => {
   }
 });
 
+// CREATE a new listing
+app.post('/api/listing', async (req, res, next) => {
+  try {
+    console.log('Creating new listing with data:', req.body);
+    
+    // Validate sellerId is a valid ObjectId
+    if (req.body.sellerId && !mongoose.Types.ObjectId.isValid(req.body.sellerId)) {
+      console.log('Invalid sellerId format:', req.body.sellerId);
+      return res.status(400).json({ error: 'Invalid sellerId format' });
+    }
+    
+    // Create the listing
+    const listing = await Listing.create(req.body);
+    console.log('Created listing:', listing);
+    
+    res.status(201).json(listing);
+  } catch (err) {
+    console.error('Error creating listing:', err);
+    next(err);
+  }
+});
+
 // ── USER ENDPOINTS ──────────────────────────────────────────────────────────────
 // Sync (upsert) user on sign-in (returns full Mongo record including _id)
 app.post('/api/users/sync', async (req, res, next) => {
