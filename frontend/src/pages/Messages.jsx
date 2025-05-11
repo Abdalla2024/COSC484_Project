@@ -195,6 +195,7 @@ function Messages() {
       {/* Chat Area */}
       <div className="flex-1 flex flex-col">
         {selectedUser ? (
+  <>
           <>
             <div className="p-4 pt-8 border-b border-gray-200 flex flex-col items-center">
   {selectedUser.photoURL ? (
@@ -253,7 +254,8 @@ function Messages() {
                 </button>
               </div>
             </form>
-          </>
+  </>
+
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
             Select a conversation to start messaging
