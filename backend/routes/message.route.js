@@ -7,8 +7,18 @@ const User = require('../models/user');
 router.get('/user/:userId', async (req, res) => {
     try {
         const { userId } = req.params;
-        console.log('Fetching messages for user:', userId);
+        console.log('Fetching messages for user ID:', userId);
+        console.log('User ID type:', typeof userId);
         
+        // Get the user to verify it exists
+        const user = await User.findById(userId);
+        if (!user) {
+            console.log(`No user found with ID: ${userId}`);
+            return res.status(404).json({ error: 'User not found' });
+        }
+        console.log(`Found user: ${user.displayName}`);
+        
+        // Try with ObjectId
         const messages = await Message.find({
             $or: [
                 { senderId: userId },
@@ -16,7 +26,18 @@ router.get('/user/:userId', async (req, res) => {
             ]
         }).sort({ timestamp: -1 });
         
-        console.log('Found messages:', messages);
+        console.log(`Found ${messages.length} messages for user ID: ${userId}`);
+        if (messages.length > 0) {
+            console.log('First message sample:', {
+                _id: messages[0]._id,
+                senderId: messages[0].senderId,
+                receiverId: messages[0].receiverId,
+                content: messages[0].content.substring(0, 30) + '...',
+                senderId_type: typeof messages[0].senderId,
+                receiverId_type: typeof messages[0].receiverId
+            });
+        }
+        
         res.json(messages);
     } catch (error) {
         console.error('Error fetching messages:', error);
@@ -28,14 +49,37 @@ router.get('/user/:userId', async (req, res) => {
 router.get('/:userId/:otherUserId', async (req, res) => {
     try {
         const { userId, otherUserId } = req.params;
+        console.log(`Fetching messages between ${userId} and ${otherUserId}`);
+        
+        // Check that both users exist
+        const [user1, user2] = await Promise.all([
+            User.findById(userId),
+            User.findById(otherUserId)
+        ]);
+        
+        if (!user1) {
+            console.log(`User ${userId} not found`);
+            return res.status(404).json({ error: `User ${userId} not found` });
+        }
+        
+        if (!user2) {
+            console.log(`User ${otherUserId} not found`);
+            return res.status(404).json({ error: `User ${otherUserId} not found` });
+        }
+        
+        console.log(`Found users: ${user1.displayName} and ${user2.displayName}`);
+        
         const messages = await Message.find({
             $or: [
                 { senderId: userId, receiverId: otherUserId },
                 { senderId: otherUserId, receiverId: userId }
             ]
         }).sort({ timestamp: 1 });
+        
+        console.log(`Found ${messages.length} messages between ${userId} and ${otherUserId}`);
         res.json(messages);
     } catch (error) {
+        console.error('Error fetching messages between users:', error);
         res.status(500).json({ error: error.message });
     }
 });
