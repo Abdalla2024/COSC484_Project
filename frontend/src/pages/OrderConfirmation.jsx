@@ -48,7 +48,7 @@ function OrderConfirmation() {
                 alt={mockOrder.listing.title}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/150?text=No+Image';
+                  e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
                 }}
               />
             </div>
@@ -77,8 +77,8 @@ function OrderConfirmation() {
             <div className="flex items-center gap-2 text-gray-600">
               <FaCreditCard className="h-5 w-5" />
               <span>
-                Payment via: {mockOrder.paymentType === 'escrow' 
-                  ? 'Escrow (Payment held until delivery confirmed)' 
+                Payment via: {mockOrder.paymentType === 'escrow'
+                  ? 'Escrow (Payment held until delivery confirmed)'
                   : 'Direct Payment'}
               </span>
             </div>

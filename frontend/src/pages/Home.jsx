@@ -3,14 +3,18 @@ import { Link } from 'react-router-dom';
 import ListingCard from '../components/ListingCard';
 import listingService from '../services/listingService';
 
+
 function Home() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  const categories = ['Textbooks', 'Electronics', 'Furniture', 'Clothing', 'School Supplies', 'Dorm Essentials', 
+
+  const categories = ['Textbooks', 'Electronics', 'Furniture', 'Clothing', 'School Supplies', 'Dorm Essentials',
     'Sports Equipment', 'Musical Instruments', 'Art Supplies', 'Lab Equipment'];
+
+
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -26,6 +30,8 @@ function Home() {
     };
 
     fetchListings();
+
+
   }, []);
 
   const filteredListings = selectedCategory
@@ -48,6 +54,8 @@ function Home() {
     );
   }
 
+
+
   return (
     <div className="min-h-screen bg-white pt-20">
       <div className="flex">
@@ -69,9 +77,8 @@ function Home() {
               <button
                 key="all"
                 onClick={() => setSelectedCategory(null)}
-                className={`text-left px-4 py-2 rounded-lg transition-colors ${
-                  !selectedCategory ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 hover:text-white'
-                }`}
+                className={`text-left px-4 py-2 rounded-lg transition-colors ${!selectedCategory ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 hover:text-white'
+                  }`}
               >
                 All Categories
               </button>
@@ -79,9 +86,8 @@ function Home() {
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`text-left px-4 py-2 rounded-lg transition-colors ${
-                    selectedCategory === category ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 hover:text-white'
-                  }`}
+                  className={`text-left px-4 py-2 rounded-lg transition-colors ${selectedCategory === category ? 'bg-yellow-500 text-white' : 'hover:bg-yellow-500 hover:text-white'
+                    }`}
                 >
                   {category}
                 </button>

@@ -15,7 +15,7 @@ function VerifyComplete() {
         console.log(mode, oobCode, params);
         if (mode === "verifyEmail" && oobCode) {
             applyActionCode(auth, oobCode).then(() => {
-                alert("Email Verified");
+                //alert("Email Verified");
                 navigate("/");
             })
                 .catch((error) => {

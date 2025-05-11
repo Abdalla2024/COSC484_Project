@@ -13,9 +13,9 @@ function ListingCard({ listing }) {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffMonths = (now.getFullYear() - date.getFullYear()) * 12 + 
-                      (now.getMonth() - date.getMonth());
-    
+    const diffMonths = (now.getFullYear() - date.getFullYear()) * 12 +
+      (now.getMonth() - date.getMonth());
+
     if (diffMonths >= 12) {
       const years = Math.floor(diffMonths / 12);
       return `${years} year${years > 1 ? 's' : ''} ago`;
@@ -27,26 +27,25 @@ function ListingCard({ listing }) {
   };
 
   return (
-    <div 
+    <div
       className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 cursor-pointer hover:shadow-md transition-shadow h-full flex flex-col"
       onClick={handleClick}
     >
       <div className="w-full aspect-[4/3] relative">
         <img
-          src={listing.images?.[0] || 'https://via.placeholder.com/400x300'}
+          src={listing.images?.[0] || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
           alt={listing.title}
           className="absolute inset-0 w-full h-full object-cover"
           onError={(e) => {
             e.target.onerror = null; // Prevent infinite loop
-            e.target.src = 'https://via.placeholder.com/400x300';
+            e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
           }}
         />
         <div className="absolute top-2 right-2">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            listing.status === 'sold' ? 'bg-red-100 text-red-800' :
-            listing.status === 'active' ? 'bg-green-100 text-green-800' :
-            'bg-yellow-100 text-yellow-800'
-          }`}>
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${listing.status === 'sold' ? 'bg-red-100 text-red-800' :
+              listing.status === 'active' ? 'bg-green-100 text-green-800' :
+                'bg-yellow-100 text-yellow-800'
+            }`}>
             {listing.status}
           </span>
         </div>
