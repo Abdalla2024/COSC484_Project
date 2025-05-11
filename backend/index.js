@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express')
-const cors = require('cors')
 const { connectDB } = require('./config/mongodb')
 const Listing = require('./models/listing')
 const User = require('./models/user')
@@ -25,14 +24,6 @@ connectDB().catch(error => {
 // Add middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-
-// CORS configuration
-app.use(cors({
-  origin: true, // Allow all origins
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
-}));
 
 // Use the routes
 app.use('/api/listing', listingRoutes)
