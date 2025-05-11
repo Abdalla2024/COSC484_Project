@@ -8,7 +8,7 @@ const Message = require('./models/message');
 const User    = require('./models/user');
 const Review  = require('./models/review');
 const reviewRoutes = require('./routes/review.route');
-const searchRoutes = require('./routes/search.route');
+const searchRoutes = require('./routes/search.route')
 
 const app = express();
 app.use(cors());
