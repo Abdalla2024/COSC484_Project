@@ -72,10 +72,11 @@ app.post('/api/users/sync', async (req, res, next) => {
   }
 });
 
-// Get user by ID
+// Get user by Firebase UID
 app.get('/api/users/:userId', async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.userId).lean();
+    const { userId } = req.params;
+    const user = await User.findOne({ firebaseId: userId }).lean();
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
   } catch (error) {
@@ -83,7 +84,7 @@ app.get('/api/users/:userId', async (req, res, next) => {
   }
 });
 
-// ── Messaging Endpoints 
+// ── Messaging Endpoints
 // Send a new message
 app.post('/api/messages', async (req, res, next) => {
   try {
