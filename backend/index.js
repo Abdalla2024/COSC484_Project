@@ -5,8 +5,18 @@ const app = express();
 
 // Handle CORS directly with middleware
 app.use((req, res, next) => {
-  // Allow requests from any origin
-  res.header('Access-Control-Allow-Origin', '*');
+  // Allow requests from frontend domain
+  const allowedOrigins = [
+    'http://localhost:5173', // Local development
+    'https://cosc-484-project-front-git-0e685d-abdalla-abdelmagids-projects.vercel.app', // Deployed frontend
+    'https://cosc484-project.vercel.app' // Production domain (if different)
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
