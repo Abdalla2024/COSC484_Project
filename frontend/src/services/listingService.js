@@ -1,10 +1,6 @@
-// Use environment variable for API URL or fallback based on environment
-const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const API_URL = isDevelopment 
-  ? 'http://localhost:3000' 
-  : 'https://cosc484-project-api.vercel.app';
-
-console.log('Using API_URL:', API_URL, 'Environment:', isDevelopment ? 'development' : 'production');
+// Use environment variable for API URL
+const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
+console.log('Using API_URL:', API_URL);
 
 export const listingService = {
   // Get all listings
