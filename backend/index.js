@@ -13,12 +13,21 @@ const app = express()
 // Add error handling for uncaught exceptions
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
+  console.error('Stack trace:', error.stack);
+  process.exit(1);
+});
+
+// Add error handling for unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise);
+  console.error('Reason:', reason);
   process.exit(1);
 });
 
 // Connect to MongoDB
 connectDB().catch(error => {
   console.error('Failed to connect to MongoDB:', error);
+  console.error('MongoDB Connection Error Stack:', error.stack);
   process.exit(1);
 });
 
@@ -41,6 +50,12 @@ app.use(cors(corsOptions));
 // Handle OPTIONS requests explicitly
 app.options('*', cors(corsOptions));
 
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
 // Use the routes
 app.use('/api/listing', listingRoutes)
 app.use('/api/messages', messageRoutes)
@@ -48,12 +63,35 @@ app.use('/api/users', userRoutes)
 
 // Root route
 app.get('/', (req, res) => {
-    res.json({ message: 'COSC484 Project API is running' });
+    res.json({ 
+        message: 'COSC484 Project API is running',
+        environment: process.env.NODE_ENV,
+        hasMongoUri: !!process.env.MONGODB_URI,
+        corsOrigin: corsOptions.origin
+    });
+});
+
+// Test route for environment variables
+app.get('/api/test-env', (req, res) => {
+    res.json({
+        nodeEnv: process.env.NODE_ENV,
+        hasMongoUri: !!process.env.MONGODB_URI,
+        mongoUriLength: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0,
+        corsOrigin: corsOptions.origin,
+        port: process.env.PORT
+    });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Error:', err);
+    console.error('Error occurred:', err);
+    console.error('Error stack:', err.stack);
+    console.error('Request details:', {
+        method: req.method,
+        url: req.url,
+        headers: req.headers,
+        body: req.body
+    });
     res.status(500).json({ 
         error: err.message,
         stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
@@ -65,4 +103,5 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`MongoDB URI: ${process.env.MONGODB_URI ? 'Set' : 'Not set'}`);
+    console.log('CORS configuration:', corsOptions);
 })
