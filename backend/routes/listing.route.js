@@ -22,6 +22,22 @@ router.post('/', async (req, res) => {
     }
 });
 
+// Get listings by user ID
+router.get('/user/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        console.log(`Fetching listings for user ID: ${userId}`);
+        
+        const listings = await Listing.find({ seller: userId });
+        
+        console.log(`Found ${listings.length} listings for user ${userId}`);
+        res.status(200).json(listings);
+    } catch (error) {
+        console.error(`Error fetching listings for user: ${error.message}`);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Get a listing by id
 router.get('/:id', async (req, res) => {
     try {

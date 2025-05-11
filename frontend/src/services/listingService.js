@@ -58,12 +58,19 @@ export const listingService = {
 
   getListingById: async (id) => {
     try {
+      console.log(`Fetching listing with ID: ${id} from URL: ${API_URL}/api/listing/${id}`);
       const response = await fetch(`${API_URL}/api/listing/${id}`);
+      
       if (!response.ok) {
+        console.error(`Error response from server: ${response.status} ${response.statusText}`);
         const error = await response.json();
         throw new Error(error.error || 'Failed to fetch listing');
       }
-      return await response.json();
+      
+      const data = await response.json();
+      console.log('Full listing data received:', data);
+      console.log('Seller data in response:', data.seller);
+      return data;
     } catch (error) {
       console.error('Error fetching listing:', error);
       throw error;
