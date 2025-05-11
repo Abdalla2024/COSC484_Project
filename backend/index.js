@@ -78,6 +78,61 @@ app.get('/api/listing', async (req, res, next) => {
   }
 });
 
+// GET listings by seller ID
+app.get('/api/listing/user/:userId', async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    console.log(`Fetching listings for seller: ${userId}`);
+    
+    let sellerId = userId;
+    
+    // If it's not a valid MongoDB ObjectId, try to find the user's MongoDB ID by Firebase ID
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.log('Not a valid ObjectId, looking up user by Firebase ID');
+      const user = await User.findOne({ firebaseId: userId }).lean();
+      
+      if (!user) {
+        console.log('User not found for Firebase ID:', userId);
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      sellerId = user._id;
+      console.log('Found MongoDB ID:', sellerId, 'for Firebase ID:', userId);
+    }
+    
+    // Find all listings by this seller
+    const listings = await Listing.find({ sellerId: new mongoose.Types.ObjectId(sellerId) }).lean();
+    console.log(`Found ${listings.length} listings for seller ${userId}`);
+    
+    // Get seller info
+    const seller = await User.findById(sellerId).lean();
+    
+    // Process listings: convert IDs to strings and add seller info
+    const processedListings = listings.map(listing => {
+      // Convert ObjectIDs to strings
+      listing._id = listing._id.toString();
+      listing.sellerId = listing.sellerId.toString();
+      
+      // Add seller data if available
+      if (seller) {
+        listing.seller = {
+          _id: seller._id.toString(),
+          username: seller.username || seller.email.split('@')[0],
+          displayName: seller.displayName || seller.username,
+          profileImage: seller.photoURL
+        };
+      }
+      
+      return listing;
+    });
+    
+    res.json(processedListings);
+  } catch (err) {
+    console.error('Error fetching seller listings:', err);
+    next(err);
+  }
+});
+
 // GET one listing by ID
 app.get('/api/listing/:id', async (req, res, next) => {
   try {
@@ -177,10 +232,37 @@ app.post('/api/users/sync', async (req, res, next) => {
 // Fetch a user by Mongo _id
 app.get('/api/users/:userId', async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.userId).lean();
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    const { userId } = req.params;
+    console.log('Fetching user data for ID:', userId);
+    
+    let user = null;
+    
+    // First try to find by MongoDB ObjectId if it's valid
+    if (mongoose.Types.ObjectId.isValid(userId)) {
+      console.log('Searching for user by MongoDB ObjectId');
+      user = await User.findById(userId).lean();
+      console.log('Result by ObjectId search:', user ? 'Found' : 'Not found');
+    }
+    
+    // If not found or not a valid ObjectId, try by Firebase ID
+    if (!user) {
+      console.log('Searching for user by Firebase ID');
+      user = await User.findOne({ firebaseId: userId }).lean();
+      console.log('Result by Firebase ID search:', user ? 'Found' : 'Not found');
+    }
+    
+    if (!user) {
+      console.log('User not found for ID:', userId);
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Convert ObjectID to string for the frontend
+    user._id = user._id.toString();
+    
+    console.log('Found user:', user.displayName || user.username || user.email);
     res.json(user);
   } catch (err) {
+    console.error('Error fetching user:', err);
     next(err);
   }
 });

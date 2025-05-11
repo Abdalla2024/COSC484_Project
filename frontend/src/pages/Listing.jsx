@@ -101,7 +101,11 @@ function Listing() {
 
   const handleSellerClick = () => {
     console.log('Seller clicked, navigating to:', `/profile/${listing?.sellerId}`);
-    navigate(`/profile/${listing?.sellerId}`);
+    if (listing?.sellerId) {
+      navigate(`/profile/${listing.sellerId}`);
+    } else {
+      console.error('Unable to navigate: sellerId is missing');
+    }
   };
 
   // Default profile picture URL
@@ -266,7 +270,7 @@ function Listing() {
               {/* Seller Info Section */}
               <div className="flex flex-col items-start gap-2 mb-6">
                 <div
-                  onClick={() => navigate(`/profile/${listing?.sellerId}`)}
+                  onClick={handleSellerClick}
                   className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 p-1 rounded-lg transition-colors"
                 >
                   <div className="relative">
@@ -281,8 +285,7 @@ function Listing() {
                       />
                     ) : (
                       <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold text-xl">
-                        {(listing?.seller?.displayName || listing?.seller?.username || listing?.seller?.email || "?")
-                          .charAt(0).toUpperCase()}
+                        {(listing?.seller?.displayName || listing?.seller?.username || listing?.seller?.email || "?").charAt(0).toUpperCase()}
                       </div>
                     )}
                     <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
