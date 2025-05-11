@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '../auth/firebaseconfig';
 import listingService from '../services/listingService';
 
 function Sell() {
   const categories = ['Textbooks', 'Electronics', 'Furniture', 'Clothing', 'School Supplies', 'Dorm Essentials', 
     'Sports Equipment', 'Musical Instruments', 'Art Supplies', 'Lab Equipment'];
 
+  const [user, loading] = useAuthState(auth);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [productData, setProductData] = useState({
     category: '',
     title: '',
@@ -22,6 +26,40 @@ function Sell() {
   const [meetupLocation, setMeetupLocation] = useState('');
   const [showLocationInput, setShowLocationInput] = useState(false);
   const navigate = useNavigate();
+
+  // Get MongoDB user ID on load
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/signin');
+      return;
+    }
+    
+    if (user) {
+      const fetchUserMongoId = async () => {
+        try {
+          const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
+          const res = await fetch(`${API_URL}/api/users/sync`, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+              uid: user.uid,
+              email: user.email,
+              displayName: user.displayName,
+              photoURL: user.photoURL
+            })
+          });
+          const userData = await res.json();
+          console.log('Current user MongoDB ID:', userData._id);
+          setCurrentUserId(userData._id);
+        } catch (error) {
+          console.error('Error fetching user MongoDB ID:', error);
+          setError('Failed to authenticate user. Please try again.');
+        }
+      };
+      
+      fetchUserMongoId();
+    }
+  }, [user, loading, navigate]);
 
   const conditions = [
     { value: 'new', label: 'New' },
@@ -81,6 +119,11 @@ function Sell() {
       setError('Please upload at least 3 photos of your item');
       return;
     }
+    
+    if (!currentUserId) {
+      setError('User authentication failed. Please sign in again.');
+      return;
+    }
 
     try {
       // Format the data according to the backend model requirements
@@ -94,9 +137,11 @@ function Sell() {
         deliveryMethod: deliveryMethod,
         meetupLocation: showLocationInput ? meetupLocation : undefined,
         status: 'active',
-        // Temporary sellerId - you'll want to replace this with actual user authentication
-        sellerId: '65f3b1234567890123456789'
+        // Use the current user's MongoDB ID
+        sellerId: currentUserId
       };
+      
+      console.log('Creating listing with sellerId:', currentUserId);
 
       // Submit to backend
       await listingService.createListing(listingData);

@@ -1,47 +1,72 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../auth/firebaseconfig';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import useDebounce from '../hooks/useDebounce';
 
-// Use environment variable for API URL
 const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
 
-function Messages() {
+export default function Messages() {
   const [user, loading] = useAuthState(auth);
   const navigate = useNavigate();
-  const [messages, setMessages] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [newMessage, setNewMessage] = useState('');
+  const { otherUserId } = useParams();
+
+  // Mongo _id of logged-in user
+  const [currentUserId, setCurrentUserId] = useState(null);
+
   const [conversations, setConversations] = useState([]);
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+
+  // Search
   const [searchValue, setSearchValue] = useState('');
-  const debouncedValue = useDebounce(searchValue, 500);
-  const messagesEndRef = useRef(null);
+  const debouncedSearch = useDebounce(searchValue, 500);
 
-  const formatTimeAgo = (timestamp) => {
-    const now = new Date();
-    const messageTime = new Date(timestamp);
-    const diffInHours = Math.floor((now - messageTime) / (1000 * 60 * 60));
-    if (diffInHours < 1) return 'just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    return `${Math.floor(diffInHours / 24)}d ago`;
-  };
-
+  const endRef = useRef(null);
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100); // Small delay to ensure DOM is updated
   };
 
+  // Get initials from display name
+  const getInitials = (name) => {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  const fmtTimeAgo = ts => {
+    const now = Date.now(), d = now - new Date(ts);
+    if (d < 3600e3) return 'just now';
+    if (d < 86400e3) return `${Math.floor(d/3600e3)}h ago`;
+    return `${Math.floor(d/86400e3)}d ago`;
+  };
+
+  // Auto-scroll when messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [messages]);
+
+  // 1) Sync Firebase → get Mongo _id
   useEffect(() => {
     if (!loading && !user) {
       navigate('/signin');
       return;
     }
     if (user) {
-      const syncUser = async () => {
-        await fetch(`${API_URL}/api/users/sync`, {
+      (async () => {
+        const res = await fetch(`${API_URL}/api/users/sync`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {'Content-Type':'application/json'},
           body: JSON.stringify({
             uid: user.uid,
             email: user.email,
@@ -49,132 +74,253 @@ function Messages() {
             photoURL: user.photoURL
           })
         });
-      };
-      syncUser();
-      fetchConversations();
+        const me = await res.json();
+        setCurrentUserId(me._id);
+      })();
     }
-  }, [user, loading, navigate]);
+  }, [user, loading]);
 
-     // Add effect for search
-     useEffect(() => {
-      if (!debouncedValue) {
-        fetchConversations();
-        return;
-      }
-  
-      const searchConversations = async () => {
-        try {
-          const response = await fetch(`${API_URL}/api/search/messages?q=${debouncedValue}`, {
-            credentials: 'include'
-          });
-          if (!response.ok) {
-            throw new Error(`Search failed: ${response.status}`);
-          }
-          const data = await response.json();
-          
-          // Filter conversations based on search results
-          const filteredConversations = conversations.filter(convo => 
-            data.some(msg => 
-              msg.senderId === convo.firebaseId || msg.receiverId === convo.firebaseId
-            )
-          );
-          
-          setConversations(filteredConversations);
-        } catch (err) {
-          console.error('Search error:', err);
+  // 2) Load conversations on login or search
+  useEffect(() => {
+    if (!currentUserId) return;
+    (async () => {
+      console.log("Loading conversations with MongoDB ID:", currentUserId);
+      
+      try {
+        const url = debouncedSearch
+          ? `${API_URL}/api/search/messages?q=${debouncedSearch}`
+          : `${API_URL}/api/messages/user/${currentUserId}`;
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch messages: ${response.status}`);
         }
-      };
-  
-      searchConversations();
-    }, [debouncedValue])
+        
+        const allMsgs = await response.json();
+        console.log("Messages received from API:", allMsgs.length, "messages");
+        
+        if (allMsgs.length > 0) {
+          console.log("First message sample:", {
+            senderId: allMsgs[0].senderId,
+            receiverId: allMsgs[0].receiverId,
+            content: allMsgs[0].content
+          });
+        }
+        
+        // Convert all IDs to strings for comparison
+        const currentUserIdStr = currentUserId.toString();
+        
+        const partnerIds = Array.from(new Set(
+          allMsgs.map(m => {
+            const senderIdStr = m.senderId.toString();
+            const receiverIdStr = m.receiverId.toString();
+            
+            return senderIdStr === currentUserIdStr 
+              ? receiverIdStr 
+              : senderIdStr;
+          })
+        ));
+        
+        console.log("Partner IDs found:", partnerIds);
 
-  const fetchConversations = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/messages/user/${user.uid}`);
-      const allMessages = await res.json();
-      const uniqueUserIds = Array.from(
-        new Set(allMessages.map(m => (m.senderId === user.uid ? m.receiverId : m.senderId)))
-      );
-      const convos = [];
-      const counts = {};
+        const convos = [];
+        const counts = {};
 
-      for (const otherId of uniqueUserIds) {
-        const threadMsgs = allMessages.filter(
-          m => m.senderId === otherId || m.receiverId === otherId
-        );
-        const lastMsg = threadMsgs.length ? threadMsgs[threadMsgs.length - 1] : null;
-        const [userRes, countRes] = await Promise.all([
-          fetch(`${API_URL}/api/users/${otherId}`),
-          fetch(`${API_URL}/api/messages/unread/${user.uid}/${otherId}`)
-        ]);
-        const userData = await userRes.json();
-        const { count } = await countRes.json();
-        convos.push({
-          firebaseId: otherId,
-          displayName: userData.displayName || 'Unknown User',
-          photoURL: userData.photoURL || '',
-          lastMessage: lastMsg
-        });
-        counts[otherId] = count;
+        for (const otherId of partnerIds) {
+          console.log("Processing conversation with partner:", otherId);
+          
+          // Use string comparison for filtering thread messages
+          const thread = allMsgs.filter(m => {
+            const senderIdStr = m.senderId.toString();
+            const receiverIdStr = m.receiverId.toString();
+            return senderIdStr === otherId || receiverIdStr === otherId;
+          });
+          
+          if (thread.length === 0) {
+            console.log("No messages found for this partner, skipping");
+            continue;
+          }
+          
+          // Sort messages by timestamp to get the latest one
+          thread.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          const lastMsg = thread[0]; // Now this is truly the latest message
+          console.log("Latest message:", lastMsg.content);
+
+          try {
+            const userRes = await fetch(`${API_URL}/api/users/${otherId}`);
+            if (!userRes.ok) {
+              console.error(`Error fetching user ${otherId}: ${userRes.status}`);
+              continue;
+            }
+            
+            const userData = await userRes.json();
+            console.log("User data retrieved:", userData.displayName);
+            
+            const unreadRes = await fetch(`${API_URL}/api/messages/unread/${currentUserId}/${otherId}`);
+            if (!unreadRes.ok) {
+              console.error(`Error fetching unread count: ${unreadRes.status}`);
+              continue;
+            }
+            
+            const { count } = await unreadRes.json();
+            console.log("Unread messages:", count);
+
+            convos.push({
+              id: otherId,
+              displayName: userData.displayName,
+              photoURL: userData.photoURL,
+              last: lastMsg
+            });
+            counts[otherId] = count;
+          } catch (error) {
+            console.error("Error processing conversation:", error);
+          }
+        }
+
+        console.log("Final conversations:", convos.length);
+        convos.sort((a, b) => new Date(b.last.timestamp) - new Date(a.last.timestamp));
+        setConversations(convos);
+        setUnreadCounts(counts);
+      } catch (error) {
+        console.error("Error loading conversations:", error);
       }
+    })();
+  }, [currentUserId, debouncedSearch]);
 
-      convos.sort((a, b) => {
-        if (!a.lastMessage) return 1;
-        if (!b.lastMessage) return -1;
-        return new Date(b.lastMessage.timestamp) - new Date(a.lastMessage.timestamp);
-      });
+  // 2a) Auto-select if URL has otherUserId
+  useEffect(() => {
+    if (!otherUserId || !currentUserId) return;
+    
+    console.log('URL parameter otherUserId:', otherUserId);
+    
+    // First try to find in existing conversations
+    const convo = conversations.find(c => c.id === otherUserId);
+    if (convo) {
+      console.log('Found existing conversation with:', convo.displayName);
+      handleSelectUser(convo);
+      return;
+    }
+    
+    // If not found in existing conversations, fetch user data and create new conversation
+    const fetchUserAndStartChat = async () => {
+      try {
+        console.log('Fetching user data for new conversation with ID:', otherUserId);
+        const userRes = await fetch(`${API_URL}/api/users/${otherUserId}`);
+        
+        if (!userRes.ok) {
+          console.error(`Error fetching user ${otherUserId}: ${userRes.status}`);
+          return;
+        }
+        
+        const userData = await userRes.json();
+        console.log('User data retrieved for new chat:', userData);
+        
+        const newConvo = {
+          id: otherUserId,
+          displayName: userData.displayName,
+          photoURL: userData.photoURL,
+          last: null // No messages yet
+        };
+        
+        console.log('Creating new conversation object:', newConvo);
+        handleSelectUser(newConvo);
+      } catch (error) {
+        console.error('Error creating new conversation:', error);
+      }
+    };
+    
+    fetchUserAndStartChat();
+  }, [otherUserId, conversations, currentUserId]);
 
-      setConversations(convos);
-      setUnreadCounts(counts);
-    } catch (err) {
-      console.error('Error fetching conversations:', err);
+  // Handle selecting a user and immediately clear unread status
+  const handleSelectUser = (convo) => {
+    setSelectedUser(convo);
+    
+    // Immediately clear unread indicator locally
+    if (unreadCounts[convo.id] > 0) {
+      setUnreadCounts(prev => ({
+        ...prev,
+        [convo.id]: 0
+      }));
     }
   };
 
-  const fetchMessages = async () => {
-    if (!selectedUser) return;
-    try {
-      const res = await fetch(
-        `${API_URL}/api/messages/${user.uid}/${selectedUser.firebaseId}`
-      );
-      const msgs = await res.json();
-      setMessages(msgs);
-      await fetch(
-        `${API_URL}/api/messages/read/${user.uid}/${selectedUser.firebaseId}`,
-        { method: 'PUT' }
-      );
-      fetchConversations();
-      setTimeout(scrollToBottom, 100);
-    } catch (err) {
-      console.error('Error fetching messages:', err);
-    }
-  };
+  // 3) Load a thread when selecting a user
+  useEffect(() => {
+    if (!selectedUser || !currentUserId) return;
+    (async () => {
+      console.log(`Loading messages between ${currentUserId} and ${selectedUser.id}`);
+      
+      try {
+        const response = await fetch(
+          `${API_URL}/api/messages/${currentUserId}/${selectedUser.id}`
+        );
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch thread: ${response.status}`);
+        }
+        
+        const thread = await response.json();
+        console.log(`Loaded ${thread.length} messages in thread`);
+        
+        setMessages(thread);
+        
+        // mark read
+        await fetch(
+          `${API_URL}/api/messages/read/${currentUserId}/${selectedUser.id}`,
+          { method: 'PUT' }
+        );
+        
+        scrollToBottom();
+      } catch (error) {
+        console.error("Error loading thread:", error);
+      }
+    })();
+  }, [selectedUser, currentUserId]);
 
-  const handleSendMessage = async (e) => {
+  // 4) Send a new message
+  const sendMessage = async e => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedUser) return;
-    await fetch(`${API_URL}/api/messages`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        senderId: user.uid,
-        receiverId: selectedUser.firebaseId,
-        content: newMessage.trim()
-      })
-    });
-    setNewMessage('');
-    fetchMessages();
+    
+    try {
+      console.log(`Sending message from ${currentUserId} to ${selectedUser.id}`);
+      
+      const response = await fetch(`${API_URL}/api/messages`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          senderId: currentUserId,
+          receiverId: selectedUser.id,
+          content: newMessage.trim()
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to send message: ${response.status}`);
+      }
+      
+      setNewMessage('');
+      
+      // refresh thread
+      const threadResponse = await fetch(
+        `${API_URL}/api/messages/${currentUserId}/${selectedUser.id}`
+      );
+      
+      if (!threadResponse.ok) {
+        throw new Error(`Failed to refresh thread: ${threadResponse.status}`);
+      }
+      
+      const thread = await threadResponse.json();
+      setMessages(thread);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
-  const handleSelectUser = (convo) => setSelectedUser(convo);
-
-  useEffect(() => {
-    if (selectedUser) fetchMessages();
-  }, [selectedUser]);
-
-  useEffect(scrollToBottom, [messages]);
-
-  if (loading) return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  if (loading || !currentUserId) {
+    return <div className="flex items-center justify-center h-screen">Loading…</div>;
+  }
 
   return (
     <div className="flex h-[calc(100vh-4rem)] mt-16 w-full">
@@ -183,7 +329,7 @@ function Messages() {
         <div className="p-4 pt-6">
           <h2 className="text-xl font-bold text-center mb-4 text-black">Conversations</h2>
           <div className="mb-4">
-          <input
+            <input
               type="text"
               placeholder="Search conversations..."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -192,42 +338,42 @@ function Messages() {
             />
           </div>
           <div className="space-y-2">
-            {conversations.map((convo) => (
+            {conversations.map((c) => (
               <div
-                key={convo.firebaseId}
-                onClick={() => handleSelectUser(convo)}
+                key={c.id}
+                onClick={() => handleSelectUser(c)}
                 className={`p-3 rounded-lg cursor-pointer hover:bg-gray-100 ${
-                  selectedUser?.firebaseId === convo.firebaseId ? 'bg-gray-100' : ''
+                  selectedUser?.id === c.id ? 'bg-gray-100' : ''
                 }`}
               >
                 <div className="flex items-center space-x-3">
-                  {convo.photoURL ? (
+                  {c.photoURL ? (
                     <img
-                      src={convo.photoURL}
-                      alt={convo.displayName}
+                      src={c.photoURL}
+                      alt={c.displayName}
                       className="w-12 h-12 rounded-full"
                     />
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-500 text-lg">
-                        {convo.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      <span className="text-gray-700 text-lg font-medium">
+                        {getInitials(c.displayName)}
                       </span>
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                       <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold truncate text-black">{convo.displayName}</h3>
-                        {unreadCounts[convo.firebaseId] > 0 && (
+                        <h3 className="font-semibold truncate text-black">{c.displayName}</h3>
+                        {unreadCounts[c.id] > 0 && (
                           <div className="w-2 h-2 rounded-full bg-blue-500" />
                         )}
                       </div>
                       <span className="text-xs text-gray-500">
-                        {convo.lastMessage ? formatTimeAgo(convo.lastMessage.timestamp) : ''}
+                        {c.last ? fmtTimeAgo(c.last.timestamp) : ''}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 truncate">
-                      {convo.lastMessage ? convo.lastMessage.content : 'No messages yet'}
+                      {c.last ? c.last.content : 'No messages yet'}
                     </p>
                   </div>
                 </div>
@@ -251,8 +397,8 @@ function Messages() {
                 />
               ) : (
                 <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500 text-2xl">
-                    {selectedUser.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  <span className="text-gray-700 text-2xl font-medium">
+                    {getInitials(selectedUser.displayName)}
                   </span>
                 </div>
               )}
@@ -260,23 +406,24 @@ function Messages() {
                 {selectedUser.displayName}
               </h2>
             </div>
+            
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(100vh-16rem)]">
-              {messages.map((message) => (
+              {messages.map((m) => (
                 <div
-                  key={message._id}
+                  key={m._id}
                   className={`flex ${
-                    message.senderId === user.uid ? 'justify-end' : 'justify-start'
+                    m.senderId === currentUserId ? 'justify-end' : 'justify-start'
                   }`}
                 >
                   <div className={`max-w-xs p-3 rounded-lg ${
-                    message.senderId === user.uid
+                    m.senderId === currentUserId
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-200 text-gray-800'
                   }`}>
-                    <p className="text-sm text-left">{message.content}</p>
+                    <p className="text-sm text-left">{m.content}</p>
                     <p className="text-xs mt-1 opacity-80 text-right">
-                      {new Date(message.timestamp).toLocaleTimeString([], {
+                      {new Date(m.timestamp).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit'
                       })}
@@ -284,17 +431,18 @@ function Messages() {
                   </div>
                 </div>
               ))}
-              <div ref={messagesEndRef} />
+              <div ref={endRef} />
             </div>
+            
             {/* Input */}
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200">
+            <form onSubmit={sendMessage} className="p-4 border-t border-gray-200">
               <div className="flex space-x-2">
                 <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder="Type a message..."
-                  className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 p-2 border border-gray-300 rounded-lg bg-black text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                   type="submit"
@@ -314,5 +462,3 @@ function Messages() {
     </div>
   );
 }
-
-export default Messages;
