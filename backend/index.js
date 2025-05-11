@@ -24,13 +24,6 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-// Connect to MongoDB
-connectDB().catch(error => {
-  console.error('Failed to connect to MongoDB:', error);
-  console.error('MongoDB Connection Error Stack:', error.stack);
-  process.exit(1);
-});
-
 // Add middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
