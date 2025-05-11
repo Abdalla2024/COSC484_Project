@@ -5,7 +5,6 @@ const { connectToDatabase } = require('./config/mongodb');
 const Listing = require('./models/listing');
 const Message = require('./models/message');
 const User    = require('./models/user');
-const searchRoutes  = require('./routes/search.route')
 
 const app = express();
 
