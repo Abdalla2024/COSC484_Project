@@ -4,7 +4,8 @@ import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } 
 import { auth } from '../auth/firebaseconfig';
 
 
-const HOME_PAGE = 'http://localhost:5173/verify-complete';
+//const HOME_PAGE = 'http://localhost:5173/verify-complete';
+const HOME_PAGE = 'https://cosc-484-project-front.vercel.app/verify-complete';
 
 const API_URL = 'http://localhost:3000/api';
 
