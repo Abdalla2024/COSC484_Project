@@ -22,7 +22,7 @@ export default function Messages() {
 
   // Search
   const [searchValue, setSearchValue] = useState('');
-  const debouncedSearch = useDebounce(searchValue, 500);
+  const debouncedValue = useDebounce(searchValue, 500);
 
   const endRef = useRef(null);
   const scrollToBottom = () => {
@@ -87,8 +87,8 @@ export default function Messages() {
       console.log("Loading conversations with MongoDB ID:", currentUserId);
       
       try {
-        const url = debouncedSearch
-          ? `${API_URL}/api/search/messages?q=${debouncedSearch}`
+        const url = debouncedValue
+          ? `${API_URL}/api/search/messages?q=${debouncedValue}`
           : `${API_URL}/api/messages/user/${currentUserId}`;
         
         const response = await fetch(url);
@@ -185,7 +185,7 @@ export default function Messages() {
         console.error("Error loading conversations:", error);
       }
     })();
-  }, [currentUserId, debouncedSearch]);
+  }, [currentUserId, debouncedValue]);
 
   // 2a) Auto-select if URL has otherUserId
   useEffect(() => {
