@@ -21,6 +21,35 @@ function Listing() {
         console.log('Fetched listing data:', data);
         console.log('Seller data:', data.seller);
         setListing(data);
+        
+        // If we have a sellerId but no seller data, fetch the seller separately
+        if (data.sellerId && !data.seller) {
+          console.log('Fetching seller data separately for ID:', data.sellerId);
+          try {
+            const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
+            const response = await fetch(`${API_URL}/api/users/${data.sellerId}`);
+            if (response.ok) {
+              const sellerData = await response.json();
+              console.log('Retrieved seller data:', sellerData);
+              
+              // Update the listing with seller data
+              setListing(prevListing => ({
+                ...prevListing, 
+                seller: {
+                  _id: sellerData._id,
+                  username: sellerData.username || sellerData.email.split('@')[0],
+                  displayName: sellerData.displayName || sellerData.username,
+                  email: sellerData.email,
+                  profileImage: sellerData.photoURL
+                }
+              }));
+            } else {
+              console.error('Failed to fetch seller data:', response.status);
+            }
+          } catch (sellerErr) {
+            console.error('Error fetching seller:', sellerErr);
+          }
+        }
       } catch (err) {
         setError(err.message || 'Failed to fetch listing');
       } finally {
@@ -241,18 +270,35 @@ function Listing() {
                   className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 p-1 rounded-lg transition-colors"
                 >
                   <div className="relative">
-                    <img
-                      src={listing?.seller?.profileImage || "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"}
-                      alt={listing?.seller?.username}
-                      className="w-12 h-12 rounded-full object-cover"
-                      onError={(e) => {
-                        e.target.src = "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png";
-                      }}
-                    />
+                    {listing?.seller?.profileImage ? (
+                      <img
+                        src={listing.seller.profileImage}
+                        alt={listing.seller.displayName || listing.seller.username || "Seller"}
+                        className="w-12 h-12 rounded-full object-cover"
+                        onError={(e) => {
+                          e.target.src = "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png";
+                        }}
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold text-xl">
+                        {(listing?.seller?.displayName || listing?.seller?.username || listing?.seller?.email || "?")
+                          .charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
                   </div>
 
-                  <span className="text-xl font-medium text-black">{listing?.seller?.username || 'Unknown User'}</span>
+                  <div className="flex flex-col">
+                    <span className="text-xl font-medium text-black">
+                      {listing?.seller?.displayName || 
+                       listing?.seller?.username || 
+                       (listing?.seller?.email && listing.seller.email.split('@')[0]) || 
+                       (listing?.sellerId ? `User ${listing.sellerId.substring(0, 8)}...` : 'Unknown User')}
+                    </span>
+                    {listing?.seller?.email && (
+                      <span className="text-sm text-gray-500">{listing.seller.email}</span>
+                    )}
+                  </div>
                 </div>
 
                 <div
