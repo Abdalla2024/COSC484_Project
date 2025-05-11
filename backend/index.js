@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
 app.use('/api/reviews', reviewRoutes);
 
 //checkout route
-app.use('api/checkout', checkoutRoutes);
+app.use('/api/checkout', checkoutRoutes);
 
 // ── LISTING ENDPOINTS ───────────────────────────────────────────────────────────
 // GET all listings
