@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../auth/firebaseconfig';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 
 function SignUp() {
   const [firstName, setFirstName] = useState('');
@@ -45,11 +45,12 @@ function SignUp() {
       // Sync with MongoDB
       try {
         console.log('Attempting to sync user with MongoDB...');
-        const response = await fetch(`${API_URL}/users/sync`, {
+        const response = await fetch(`${API_URL}/api/users/sync`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify({
             uid: user.uid,
             email: user.email,
