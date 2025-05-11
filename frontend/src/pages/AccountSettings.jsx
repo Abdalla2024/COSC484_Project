@@ -1,10 +1,13 @@
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../auth/firebaseconfig';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+
+const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
 
 function AccountSettings() {
   const [user, loading] = useAuthState(auth);
+  const [mongoUser, setMongoUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -12,6 +15,37 @@ function AccountSettings() {
       navigate('/signin');
     }
   }, [user, loading, navigate]);
+
+  // Fetch MongoDB user data
+  useEffect(() => {
+    if (user) {
+      fetchMongoUser();
+    }
+  }, [user]);
+
+  const fetchMongoUser = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/users/sync`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error syncing user: ${response.status}`);
+      }
+      
+      const userData = await response.json();
+      setMongoUser(userData);
+    } catch (error) {
+      console.error("Error fetching MongoDB user data:", error);
+    }
+  };
 
   const getUserInitials = () => {
     if (!user?.displayName) return 'U';
@@ -53,8 +87,13 @@ function AccountSettings() {
           </div>
 
           <div className="border-b pb-4 text-center">
-            <h2 className="text-lg font-semibold mb-2 text-black">User ID</h2>
+            <h2 className="text-lg font-semibold mb-2 text-black">Firebase User ID</h2>
             <p className="text-gray-600 break-all">{user?.uid}</p>
+          </div>
+
+          <div className="border-b pb-4 text-center">
+            <h2 className="text-lg font-semibold mb-2 text-black">MongoDB ObjectID</h2>
+            <p className="text-gray-600 break-all">{mongoUser?._id || 'Loading...'}</p>
           </div>
 
           <div className="border-b pb-4 text-center">

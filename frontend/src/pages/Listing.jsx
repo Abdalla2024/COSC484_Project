@@ -44,8 +44,10 @@ function Listing() {
   ];
 
   const handleMessageClick = () => {
-    navigate('/messaging');
-  };
+    if (listing.sellerId) {
+      navigate(`/messages/${listing.sellerId}`);
+    }
+  }
 
   const handleReviewsClick = () => {
     navigate(`/account-reviews/${listing?.seller?._id}`);
