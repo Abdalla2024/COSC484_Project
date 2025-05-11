@@ -53,7 +53,6 @@ function Messages() {
             headers: {
               'Content-Type': 'application/json',
             },
-            credentials: 'include',
             body: JSON.stringify({
               uid: user.uid,
               email: user.email,
@@ -76,9 +75,7 @@ function Messages() {
     try {
       console.log('Fetching conversations...');
       // Get all messages for the current user
-      const messagesResponse = await fetch(`${API_URL}/api/messages/user/${user.uid}`, {
-        credentials: 'include'
-      });
+      const messagesResponse = await fetch(`${API_URL}/api/messages/user/${user.uid}`);
       const allMessages = await messagesResponse.json();
       console.log('All messages:', allMessages);
       
@@ -100,16 +97,12 @@ function Messages() {
       for (const userId of uniqueUserIds) {
         try {
           console.log(`Fetching user details for ${userId}...`);
-          const userResponse = await fetch(`${API_URL}/api/users/${userId}`, {
-            credentials: 'include'
-          });
+          const userResponse = await fetch(`${API_URL}/api/users/${userId}`);
           const userData = await userResponse.json();
           console.log(`User details for ${userId}:`, userData);
           
           // Get unread count
-          const countResponse = await fetch(`${API_URL}/api/messages/unread/${user.uid}/${userId}`, {
-            credentials: 'include'
-          });
+          const countResponse = await fetch(`${API_URL}/api/messages/unread/${user.uid}/${userId}`);
           const count = await countResponse.json();
           console.log(`Unread count for ${userId}:`, count);
           
@@ -148,17 +141,14 @@ function Messages() {
     if (!selectedUser) return;
     try {
       console.log('Fetching messages between', user.uid, 'and', selectedUser.firebaseId);
-      const response = await fetch(`${API_URL}/api/messages/${user.uid}/${selectedUser.firebaseId}`, {
-        credentials: 'include'
-      });
+      const response = await fetch(`${API_URL}/api/messages/${user.uid}/${selectedUser.firebaseId}`);
       const messages = await response.json();
       console.log('Fetched messages:', messages);
       setMessages(messages);
       
       // Mark messages as read
       await fetch(`${API_URL}/api/messages/read/${user.uid}/${selectedUser.firebaseId}`, {
-        method: 'PUT',
-        credentials: 'include'
+        method: 'PUT'
       });
       
       fetchConversations(); // Refresh unread counts
@@ -185,7 +175,6 @@ function Messages() {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
         body: JSON.stringify({
           senderId: user.uid,
           receiverId: selectedUser.firebaseId,

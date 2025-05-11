@@ -9,8 +9,7 @@ export const listingService = {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-        },
-        credentials: 'include'
+        }
       });
       
       if (!response.ok) {
@@ -35,7 +34,6 @@ export const listingService = {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
         body: JSON.stringify(listingData)
       });
 
@@ -58,9 +56,7 @@ export const listingService = {
 
   getListingById: async (id) => {
     try {
-      const response = await fetch(`${API_URL}/api/listing/${id}`, {
-        credentials: 'include'
-      });
+      const response = await fetch(`${API_URL}/api/listing/${id}`);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Failed to fetch listing');
