@@ -149,9 +149,7 @@ function Messages() {
       <div className="w-1/4 border-r border-gray-200 bg-white">
         <div className="p-4 pt-6">
           <h2 className="text-xl font-bold text-center mb-4 text-black">Conversations</h2>
-          <div className="mb-4">
-            {/* search input omitted */}
-          </div>
+          <div className="mb-4">{/* search input omitted */}</div>
           <div className="space-y-2">
             {conversations.map((convo) => (
               <div
@@ -173,7 +171,12 @@ function Messages() {
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
-                      <h3 className="font-semibold truncate text-black">{convo.displayName}</h3>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-semibold truncate text-black">{convo.displayName}</h3>
+                        {unreadCounts[convo.firebaseId] > 0 && (
+                          <div className="w-2 h-2 rounded-full bg-blue-500" />
+                        )}
+                      </div>
                       <span className="text-xs text-gray-500">
                         {convo.lastMessage ? formatTimeAgo(convo.lastMessage.timestamp) : ''}
                       </span>
