@@ -35,7 +35,6 @@ function Messages() {
       return;
     }
     if (user) {
-      // Sync user and fetch conversations
       const syncUser = async () => {
         await fetch(`${API_URL}/api/users/sync`, {
           method: 'POST',
@@ -55,40 +54,35 @@ function Messages() {
 
   const fetchConversations = async () => {
     try {
-      const messagesRes = await fetch(`${API_URL}/api/messages/user/${user.uid}`);
-      const allMessages = await messagesRes.json();
-
+      const res = await fetch(`${API_URL}/api/messages/user/${user.uid}`);
+      const allMessages = await res.json();
       const uniqueUserIds = Array.from(
         new Set(allMessages.map(m => (m.senderId === user.uid ? m.receiverId : m.senderId)))
       );
-
       const convos = [];
       const counts = {};
 
       for (const otherId of uniqueUserIds) {
-        const userMsgs = allMessages.filter(
+        const threadMsgs = allMessages.filter(
           m => m.senderId === otherId || m.receiverId === otherId
         );
-        const lastMsg = userMsgs.length ? userMsgs[userMsgs.length - 1] : null;
-
+        const lastMsg = threadMsgs.length ? threadMsgs[threadMsgs.length - 1] : null;
         const [userRes, countRes] = await Promise.all([
           fetch(`${API_URL}/api/users/${otherId}`),
           fetch(`${API_URL}/api/messages/unread/${user.uid}/${otherId}`)
         ]);
         const userData = await userRes.json();
         const { count } = await countRes.json();
-
         convos.push({
           firebaseId: otherId,
           displayName: userData.displayName || 'Unknown User',
-          email: userData.email || '',
           photoURL: userData.photoURL || '',
           lastMessage: lastMsg
         });
         counts[otherId] = count;
       }
 
-      // Sort by newest conversation
+      // Sort by newest lastMessage first
       convos.sort((a, b) => {
         if (!a.lastMessage) return 1;
         if (!b.lastMessage) return -1;
@@ -97,8 +91,8 @@ function Messages() {
 
       setConversations(convos);
       setUnreadCounts(counts);
-    } catch (error) {
-      console.error('Error fetching conversations:', error);
+    } catch (err) {
+      console.error('Error fetching conversations:', err);
     }
   };
 
@@ -116,8 +110,8 @@ function Messages() {
       );
       fetchConversations();
       setTimeout(scrollToBottom, 100);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
+    } catch (err) {
+      console.error('Error fetching messages:', err);
     }
   };
 
@@ -139,7 +133,6 @@ function Messages() {
 
   const handleSelectUser = (convo) => {
     setSelectedUser(convo);
-    fetchMessages();
   };
 
   useEffect(() => {
@@ -157,7 +150,7 @@ function Messages() {
         <div className="p-4 pt-6">
           <h2 className="text-xl font-bold text-center mb-4 text-black">Conversations</h2>
           <div className="mb-4">
-            {/* search input omitted for brevity */}
+            {/* search input omitted */}
           </div>
           <div className="space-y-2">
             {conversations.map((convo) => (
@@ -170,11 +163,7 @@ function Messages() {
               >
                 <div className="flex items-center space-x-3">
                   {convo.photoURL ? (
-                    <img
-                      src={convo.photoURL}
-                      alt={convo.displayName}
-                      className="w-12 h-12 rounded-full"
-                    />
+                    <img src={convo.photoURL} alt={convo.displayName} className="w-12 h-12 rounded-full" />
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
                       <span className="text-gray-500 text-lg">
@@ -184,12 +173,7 @@ function Messages() {
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold truncate text-black">{convo.displayName}</h3>
-                        {unreadCounts[convo.firebaseId] > 0 && (
-                          <div className="w-2 h-2 rounded-full bg-blue-500" />
-                        )}
-                      </div>
+                      <h3 className="font-semibold truncate text-black">{convo.displayName}</h3>
                       <span className="text-xs text-gray-500">
                         {convo.lastMessage ? formatTimeAgo(convo.lastMessage.timestamp) : ''}
                       </span>
@@ -206,7 +190,66 @@ function Messages() {
       </div>
 
       {/* Chat Area */}
-      {/* ... rest unchanged ... */}
+      <div className="flex-1 flex flex-col">
+        {selectedUser ? (
+          <>
+            <div className="p-4 pt-8 border-b border-gray-200 flex items-center space-x-4">
+              {selectedUser.photoURL ? (
+                <img src={selectedUser.photoURL} alt={selectedUser.displayName} className="w-16 h-16 rounded-full" />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500 text-2xl">
+                    {selectedUser.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <h2 className="text-lg font-semibold text-black">{selectedUser.displayName}</h2>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[calc(100vh-16rem)]">
+              {messages.map((message) => (
+                <div
+                  key={message._id}
+                  className={`flex ${
+                    message.senderId === user.uid ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  <div className={`max-w-xs p-3 rounded-lg ${
+                    message.senderId === user.uid ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'
+                  }`}
+                  >
+                    <p className="text-sm text-left">{message.content}</p>
+                    <p className="text-xs mt-1 opacity-80 text-right">
+                      {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+            <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200">
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Send
+                </button>
+              </div>
+            </form>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-gray-500">
+            Select a conversation to start messaging
+          </div>
+        )}
+      </div>
     </div>
   );
 }
