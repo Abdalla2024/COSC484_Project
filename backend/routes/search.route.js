@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose')
-const { connectDB } = require('../config/mongodb'); // Adjust path as needed
+const { connectToDatabase } = require('../config/mongodb'); // Adjust path as needed
 
-connectDB(); 
+connectToDatabase();
 
 // Search Messages Route
 router.get('/messages', async (req, res) => {
