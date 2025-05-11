@@ -14,7 +14,7 @@ function AccountPFP({ user }) {
     >
       <div className="relative">
         <img
-          src={user.profilePicture || 'https://via.placeholder.com/40'} // Default avatar if none provided
+          src={user.profilePicture || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'} // Default avatar if none provided
           alt={`${user.username}'s profile`}
           className="w-10 h-10 rounded-full object-cover border-2 border-[#FFBB00]"
         />

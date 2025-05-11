@@ -108,19 +108,18 @@ function Listing() {
           {/* Left Column - Image Gallery */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div 
+            <div
               className="relative bg-white rounded-lg shadow-sm overflow-hidden cursor-zoom-in"
               onClick={handleImageClick}
             >
               <img
-                src={listing.images?.[selectedImage] || 'https://via.placeholder.com/800x600'}
+                src={listing.images?.[selectedImage] || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
                 alt={listing.title}
-                className={`w-full h-[600px] object-contain transition-transform duration-300 ${
-                  isZoomed ? 'scale-150' : 'scale-100'
-                }`}
+                className={`w-full h-[600px] object-contain transition-transform duration-300 ${isZoomed ? 'scale-150' : 'scale-100'
+                  }`}
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = 'https://via.placeholder.com/800x600';
+                  e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
                 }}
               />
             </div>
@@ -132,9 +131,8 @@ function Listing() {
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`relative aspect-square rounded-lg overflow-hidden ${
-                      selectedImage === index ? 'ring-2 ring-[#FFBB00]' : 'ring-1 ring-gray-200'
-                    } hover:opacity-90 transition-opacity`}
+                    className={`relative aspect-square rounded-lg overflow-hidden ${selectedImage === index ? 'ring-2 ring-[#FFBB00]' : 'ring-1 ring-gray-200'
+                      } hover:opacity-90 transition-opacity`}
                   >
                     <img
                       src={image}
@@ -142,7 +140,7 @@ function Listing() {
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'https://via.placeholder.com/200x200';
+                        e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
                       }}
                     />
                   </button>
@@ -160,7 +158,7 @@ function Listing() {
               <p className="text-2xl font-bold text-[#FFB800] mb-4">
                 ${listing.price}
               </p>
-              
+
               {/* Condition */}
               <div className="mb-4">
                 <span className="text-sm font-medium text-gray-700">Condition:</span>
@@ -183,11 +181,10 @@ function Listing() {
                   <span className="text-sm text-gray-500">
                     Posted {formatDate(listing.createdAt)}
                   </span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    listing.status === 'sold' ? 'bg-red-100 text-red-800' :
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${listing.status === 'sold' ? 'bg-red-100 text-red-800' :
                     listing.status === 'active' ? 'bg-green-100 text-green-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
                     {listing.status}
                   </span>
                 </div>
@@ -209,7 +206,7 @@ function Listing() {
 
             {/* Action Buttons */}
             <div className="space-y-4">
-              <button 
+              <button
                 onClick={handleBuyNow}
                 className="w-full bg-[#FFB800] text-black py-3 px-4 rounded-md hover:bg-[#FFB800]/90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFB800] flex items-center justify-center"
               >
@@ -228,7 +225,7 @@ function Listing() {
 
               {/* Seller Info Section */}
               <div className="flex flex-col items-start gap-2 mb-6">
-                <div 
+                <div
                   onClick={() => navigate(`/profile/${listing?.seller?._id}`)}
                   className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 p-1 rounded-lg transition-colors"
                 >
@@ -243,11 +240,11 @@ function Listing() {
                     />
                     <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
                   </div>
-                  
+
                   <span className="text-xl font-medium text-black">{listing?.seller?.username || 'Unknown User'}</span>
                 </div>
 
-                <div 
+                <div
                   onClick={() => navigate(`/reviews/${listing?.seller?._id}`)}
                   className="text-blue-600 hover:underline cursor-pointer"
                 >
@@ -283,13 +280,13 @@ function Listing() {
 
       {/* Zoom Modal */}
       {isZoomed && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center"
           onClick={() => setIsZoomed(false)}
         >
           <div className="relative w-full h-full p-4 flex items-center justify-center">
             <img
-              src={listing.images?.[selectedImage] || 'https://via.placeholder.com/800x600'}
+              src={listing.images?.[selectedImage] || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
               alt={listing.title}
               className="max-w-[90vw] max-h-[90vh] object-contain"
             />

@@ -5,7 +5,7 @@ import { useParams, Link } from 'react-router-dom';
 const mockUser = {
   _id: '123',
   username: 'JohnDoe',
-  profileImage: 'https://via.placeholder.com/100',
+  profileImage: 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png',
   rating: 4.5,
   listings: [
     {
@@ -14,7 +14,7 @@ const mockUser = {
       price: 25.99,
       condition: 'Good',
       category: 'Books',
-      images: ['https://via.placeholder.com/400x300'],
+      images: ['https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'],
       createdAt: new Date().toISOString(),
       status: 'active'
     },
@@ -24,7 +24,7 @@ const mockUser = {
       price: 45.00,
       condition: 'Like New',
       category: 'Appliances',
-      images: ['https://via.placeholder.com/400x300'],
+      images: ['https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'],
       createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
       status: 'active'
     }
@@ -52,7 +52,7 @@ function AccountPage() {
                 <span className="text-[#FFB800]">★</span>
                 <span className="ml-1">{user.rating.toFixed(1)}</span>
               </div>
-              <Link 
+              <Link
                 to={`/reviews/${userId}`}
                 className="text-blue-600 hover:underline"
               >

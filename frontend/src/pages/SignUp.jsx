@@ -83,7 +83,7 @@ function SignUp() {
       }
 
       alert("Email verification Sent");
-      navigate('/verify-pending');
+      //
     } catch (error) {
       let errorMessage = "An error occurred during sign up";
 
