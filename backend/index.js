@@ -1,26 +1,21 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const { connectToDatabase } = require('./config/mongodb');
 const Listing = require('./models/listing');
 const Message = require('./models/message');
 const User    = require('./models/user');
 const Review  = require('./models/review');
 const reviewRoutes = require('./routes/review.route');
-const mongoose = require('mongoose')
-
-// Import routes
 const searchRoutes = require('./routes/search.route');
 
 const app = express();
-
-// Enable CORS for all routes
 app.use(cors());
-// Parse JSON and URL-encoded bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Ensure MongoDB connection before handling any request
+// Ensure MongoDB is connected before any route
 app.use(async (req, res, next) => {
   try {
     await connectToDatabase();
@@ -30,7 +25,7 @@ app.use(async (req, res, next) => {
   }
 });
 
-// Root health-check route
+// Health-check
 app.get('/', (req, res) => {
   res.json({ message: 'API is running' });
 });
@@ -38,10 +33,9 @@ app.get('/', (req, res) => {
 // Mount review routes
 app.use('/api/reviews', reviewRoutes);
 
-// Use routes
-app.use('/api/search', searchRoutes);
+app.use('/api/search',searchRoutes)
 
-// ── Listing Endpoints 
+// ── LISTING ENDPOINTS ───────────────────────────────────────────────────────────
 // GET all listings
 app.get('/api/listing', async (req, res, next) => {
   try {
@@ -222,44 +216,8 @@ app.post('/api/listing', async (req, res, next) => {
   }
 });
 
-// CREATE a new listing
-app.post('/api/listing', async (req, res, next) => {
-  try {
-    console.log('Creating new listing with data:', req.body);
-    
-    // Validate sellerId is a valid ObjectId
-    if (req.body.sellerId && !mongoose.Types.ObjectId.isValid(req.body.sellerId)) {
-      console.log('Invalid sellerId format:', req.body.sellerId);
-      return res.status(400).json({ error: 'Invalid sellerId format' });
-    }
-    
-    // Create the listing
-    const listing = await Listing.create(req.body);
-    console.log('Created listing:', listing);
-    
-    res.status(201).json(listing);
-  } catch (err) {
-    console.error('Error creating listing:', err);
-    next(err);
-  }
-});
-
-//Update a listing
-app.patch('/api/listing/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const listing = await Listing.findByIdAndUpdate(id, req.body, { new: true });
-        if (!listing) {
-            return res.status(404).json({ error: 'Listing not found' });
-        }
-        res.status(200).json(listing);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// ── User Endpoints 
-// Sync (upsert) user on sign-in
+// ── USER ENDPOINTS ──────────────────────────────────────────────────────────────
+// Sync (upsert) user on sign-in (returns full Mongo record including _id)
 app.post('/api/users/sync', async (req, res, next) => {
   try {
     const { uid, email, displayName, photoURL } = req.body;
@@ -271,15 +229,15 @@ app.post('/api/users/sync', async (req, res, next) => {
       photoURL: photoURL || '',
       username: email.split('@')[0]
     };
-    const options = { upsert: true, new: true, setDefaultsOnInsert: true };
-    const user = await User.findOneAndUpdate(filter, update, options).lean();
+    const opts = { upsert: true, new: true, setDefaultsOnInsert: true };
+    const user = await User.findOneAndUpdate(filter, update, opts).lean();
     res.json(user);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 });
 
-// Get user by Firebase UID
+// Fetch a user by Mongo _id
 app.get('/api/users/:userId', async (req, res, next) => {
   try {
     const { userId } = req.params;
@@ -317,72 +275,225 @@ app.get('/api/users/:userId', async (req, res, next) => {
   }
 });
 
-// ── Messaging Endpoints
+// ── MESSAGING ENDPOINTS ────────────────────────────────────────────────────────
 // Send a new message
 app.post('/api/messages', async (req, res, next) => {
   try {
-    const msg = await Message.create(req.body);
-    res.status(201).json(msg);
-  } catch (error) {
-    next(error);
+    const { senderId, receiverId, content } = req.body;
+    console.log('Creating message with:', { 
+      senderId, 
+      receiverId, 
+      content,
+      senderId_type: typeof senderId,
+      receiverId_type: typeof receiverId
+    });
+    
+    // Validate and convert IDs to ObjectIDs if needed
+    if (!mongoose.Types.ObjectId.isValid(senderId)) {
+      console.log('Invalid sender ID format:', senderId);
+      return res.status(400).json({ error: 'Invalid senderId' });
+    }
+    
+    if (!mongoose.Types.ObjectId.isValid(receiverId)) {
+      console.log('Invalid receiver ID format:', receiverId);
+      return res.status(400).json({ error: 'Invalid receiverId' });
+    }
+    
+    // Always create with proper ObjectId
+    const messageData = {
+      senderId: new mongoose.Types.ObjectId(senderId),
+      receiverId: new mongoose.Types.ObjectId(receiverId),
+      content,
+      read: false,
+      timestamp: new Date()
+    };
+    
+    const msg = await Message.create(messageData);
+    console.log('Created message:', msg);
+    
+    // Convert ObjectIDs to strings for the frontend
+    const processedMsg = {
+      ...msg.toObject(),
+      _id: msg._id.toString(),
+      senderId: msg.senderId.toString(),
+      receiverId: msg.receiverId.toString()
+    };
+    
+    res.status(201).json(processedMsg);
+  } catch (err) {
+    console.error('Error creating message:', err);
+    next(err);
   }
 });
 
-// Get all conversations for a user
-app.get('/api/messages/user/:userId', async (req, res, next) => {
+// ── Get all messages involving this Mongo userId ──
+app.get('/api/messages/user/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
+    console.log('Fetching messages for user ID:', userId);
+    console.log('User ID type:', typeof userId);
+    
+    // validate userId is a real ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.log('Invalid ObjectId format:', userId);
+      return res.status(400).json({ error: 'Invalid userId' });
+    }
+    
+    const oid = new mongoose.Types.ObjectId(userId);
+    console.log('Converted to ObjectId:', oid);
+
     const convos = await Message.find({
-      $or: [ { senderId: userId }, { receiverId: userId } ]
-    }).sort('timestamp').lean();
-    res.json(convos);
-  } catch (error) {
-    next(error);
+      $or: [
+        { senderId: oid },
+        { receiverId: oid }
+      ]
+    })
+    .sort({ timestamp: -1 })
+    .lean();
+
+    console.log(`Found ${convos.length} messages for user ID: ${userId}`);
+    
+    if (convos.length > 0) {
+      const sample = convos[0];
+      console.log('Sample message:', {
+        _id: sample._id,
+        senderId: sample.senderId,
+        senderId_type: typeof sample.senderId,
+        receiverId: sample.receiverId,
+        receiverId_type: typeof sample.receiverId,
+        content: sample.content.substring(0, 30) + '...',
+      });
+    }
+
+    // Convert ObjectIDs to strings for the frontend
+    const processedConvos = convos.map(msg => ({
+      ...msg,
+      _id: msg._id.toString(),
+      senderId: msg.senderId.toString(),
+      receiverId: msg.receiverId.toString()
+    }));
+
+    return res.json(processedConvos);
+  } catch (err) {
+    console.error('Error fetching messages for user:', err);
+    return res.status(500).json({ error: err.message });
   }
 });
 
-// Get one-to-one thread between two users
-app.get('/api/messages/:userId/:otherUserId', async (req, res, next) => {
+// ── Get one‐to‐one thread between two ObjectIds ──
+app.get('/api/messages/:userId/:otherUserId', async (req, res) => {
   try {
     const { userId, otherUserId } = req.params;
+    console.log(`Fetching messages between ${userId} and ${otherUserId}`);
+    
+    if (
+      !mongoose.Types.ObjectId.isValid(userId) ||
+      !mongoose.Types.ObjectId.isValid(otherUserId)
+    ) {
+      console.log('Invalid ObjectId format: userId =', userId, 'otherUserId =', otherUserId);
+      return res.status(400).json({ error: 'Invalid userId or otherUserId' });
+    }
+    
+    const uid = new mongoose.Types.ObjectId(userId);
+    const oid = new mongoose.Types.ObjectId(otherUserId);
+    console.log('Converted to ObjectIds:', { uid, oid });
+
     const thread = await Message.find({
       $or: [
-        { senderId: userId,   receiverId: otherUserId },
-        { senderId: otherUserId, receiverId: userId }
+        { senderId: uid, receiverId: oid },
+        { senderId: oid, receiverId: uid }
       ]
-    }).sort('timestamp').lean();
-    res.json(thread);
-  } catch (error) {
-    next(error);
+    })
+    .sort({ timestamp: 1 })
+    .lean();
+
+    console.log(`Found ${thread.length} messages between ${userId} and ${otherUserId}`);
+    
+    if (thread.length > 0) {
+      const sample = thread[0];
+      console.log('Sample message:', {
+        _id: sample._id,
+        senderId: sample.senderId,
+        receiverId: sample.receiverId,
+        content: sample.content.substring(0, 30) + '...',
+      });
+    }
+
+    // Convert ObjectIDs to strings for the frontend
+    const processedThread = thread.map(msg => ({
+      ...msg,
+      _id: msg._id.toString(),
+      senderId: msg.senderId.toString(),
+      receiverId: msg.receiverId.toString()
+    }));
+
+    return res.json(processedThread);
+  } catch (err) {
+    console.error('Error fetching thread:', err);
+    return res.status(500).json({ error: err.message });
   }
 });
 
-// Mark messages as read
+// Mark messages read in a thread
 app.put('/api/messages/read/:userId/:otherUserId', async (req, res, next) => {
   try {
     const { userId, otherUserId } = req.params;
-    await Message.updateMany(
-      { senderId: otherUserId, receiverId: userId, read: false },
+    console.log(`Marking messages as read between ${userId} and ${otherUserId}`);
+    
+    if (
+      !mongoose.Types.ObjectId.isValid(userId) ||
+      !mongoose.Types.ObjectId.isValid(otherUserId)
+    ) {
+      console.log('Invalid ObjectId format: userId =', userId, 'otherUserId =', otherUserId);
+      return res.status(400).json({ error: 'Invalid userId or otherUserId' });
+    }
+    
+    const uid = new mongoose.Types.ObjectId(userId);
+    const oid = new mongoose.Types.ObjectId(otherUserId);
+    console.log('Converted to ObjectIds:', { uid, oid });
+    
+    const result = await Message.updateMany(
+      { senderId: oid, receiverId: uid, read: false },
       { read: true }
     );
-    res.json({ success: true });
-  } catch (error) {
-    next(error);
+    
+    console.log(`Marked ${result.modifiedCount} messages as read`);
+    res.json({ success: true, messagesMarkedAsRead: result.modifiedCount });
+  } catch (err) {
+    console.error('Error marking messages as read:', err);
+    next(err);
   }
 });
 
-// Get unread message count
+// Get unread count for a thread
 app.get('/api/messages/unread/:userId/:otherUserId', async (req, res, next) => {
   try {
     const { userId, otherUserId } = req.params;
+    console.log(`Getting unread count between ${userId} and ${otherUserId}`);
+    
+    if (
+      !mongoose.Types.ObjectId.isValid(userId) ||
+      !mongoose.Types.ObjectId.isValid(otherUserId)
+    ) {
+      console.log('Invalid ObjectId format: userId =', userId, 'otherUserId =', otherUserId);
+      return res.status(400).json({ error: 'Invalid userId or otherUserId' });
+    }
+    
+    const uid = new mongoose.Types.ObjectId(userId);
+    const oid = new mongoose.Types.ObjectId(otherUserId);
+    console.log('Converted to ObjectIds:', { uid, oid });
+    
     const count = await Message.countDocuments({
-      senderId: otherUserId,
-      receiverId: userId,
+      senderId: oid,
+      receiverId: uid,
       read: false
     });
+    
+    console.log(`Found ${count} unread messages`);
     res.json({ count });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    console.error('Error getting unread count:', err);
+    next(err);
   }
 });
 
@@ -392,11 +503,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
-// For local development
+// Start local dev server
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
-// Export app for serverless deployment
 module.exports = app;
