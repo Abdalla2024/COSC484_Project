@@ -98,10 +98,6 @@ function Checkout() {
             </div>
           </div>
         </div>
-<<<<<<< HEAD
-
-=======
->>>>>>> ce40dc9 (Did some work on messages going to stick to abdalla's though)
         {/* Payment Form */}
         {/* <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Payment Information</h2>

@@ -37,7 +37,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update a listing by id
-router.put('/:id', async (req, res) => {
+router.patch('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const listing = await Listing.findByIdAndUpdate(id, req.body, { new: true });
