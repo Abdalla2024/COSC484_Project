@@ -189,12 +189,48 @@ export default function Messages() {
 
   // 2a) Auto-select if URL has otherUserId
   useEffect(() => {
-    if (!otherUserId || !conversations.length) return;
+    if (!otherUserId || !currentUserId) return;
+    
+    console.log('URL parameter otherUserId:', otherUserId);
+    
+    // First try to find in existing conversations
     const convo = conversations.find(c => c.id === otherUserId);
     if (convo) {
-      setSelectedUser(convo);
+      console.log('Found existing conversation with:', convo.displayName);
+      handleSelectUser(convo);
+      return;
     }
-  }, [otherUserId, conversations]);
+    
+    // If not found in existing conversations, fetch user data and create new conversation
+    const fetchUserAndStartChat = async () => {
+      try {
+        console.log('Fetching user data for new conversation with ID:', otherUserId);
+        const userRes = await fetch(`${API_URL}/api/users/${otherUserId}`);
+        
+        if (!userRes.ok) {
+          console.error(`Error fetching user ${otherUserId}: ${userRes.status}`);
+          return;
+        }
+        
+        const userData = await userRes.json();
+        console.log('User data retrieved for new chat:', userData);
+        
+        const newConvo = {
+          id: otherUserId,
+          displayName: userData.displayName,
+          photoURL: userData.photoURL,
+          last: null // No messages yet
+        };
+        
+        console.log('Creating new conversation object:', newConvo);
+        handleSelectUser(newConvo);
+      } catch (error) {
+        console.error('Error creating new conversation:', error);
+      }
+    };
+    
+    fetchUserAndStartChat();
+  }, [otherUserId, conversations, currentUserId]);
 
   // Handle selecting a user and immediately clear unread status
   const handleSelectUser = (convo) => {
@@ -333,7 +369,7 @@ export default function Messages() {
                         )}
                       </div>
                       <span className="text-xs text-gray-500">
-                        {fmtTimeAgo(c.last.timestamp)}
+                        {c.last ? fmtTimeAgo(c.last.timestamp) : ''}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 truncate">

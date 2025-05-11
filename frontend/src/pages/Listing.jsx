@@ -18,6 +18,8 @@ function Listing() {
     const fetchListing = async () => {
       try {
         const data = await listingService.getListingById(id);
+        console.log('Fetched listing data:', data);
+        console.log('Seller data:', data.seller);
         setListing(data);
       } catch (err) {
         setError(err.message || 'Failed to fetch listing');
@@ -44,13 +46,20 @@ function Listing() {
   ];
 
   const handleMessageClick = () => {
-    if (listing.sellerId) {
+    console.log('Message seller clicked');
+    console.log('Listing data:', listing);
+    console.log('Seller ID from listing.sellerId:', listing?.sellerId);
+    
+    if (listing?.sellerId) {
+      console.log('Navigating to:', `/messages/${listing.sellerId}`);
       navigate(`/messages/${listing.sellerId}`);
+    } else {
+      console.error('Unable to navigate: sellerId is missing');
     }
   }
 
   const handleReviewsClick = () => {
-    navigate(`/account-reviews/${listing?.seller?._id}`);
+    navigate(`/reviews/${listing?.sellerId}`);
   };
 
   const handleImageClick = () => {
@@ -62,8 +71,8 @@ function Listing() {
   };
 
   const handleSellerClick = () => {
-    console.log('Seller clicked, navigating to:', `/profile/${listing?.seller?._id}`); // Debug log
-    navigate(`/profile/${listing?.seller?._id}`);
+    console.log('Seller clicked, navigating to:', `/profile/${listing?.sellerId}`);
+    navigate(`/profile/${listing?.sellerId}`);
   };
 
   // Default profile picture URL
@@ -228,7 +237,7 @@ function Listing() {
               {/* Seller Info Section */}
               <div className="flex flex-col items-start gap-2 mb-6">
                 <div
-                  onClick={() => navigate(`/profile/${listing?.seller?._id}`)}
+                  onClick={() => navigate(`/profile/${listing?.sellerId}`)}
                   className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 p-1 rounded-lg transition-colors"
                 >
                   <div className="relative">
@@ -247,7 +256,7 @@ function Listing() {
                 </div>
 
                 <div
-                  onClick={() => navigate(`/reviews/${listing?.seller?._id}`)}
+                  onClick={() => navigate(`/reviews/${listing?.sellerId}`)}
                   className="text-blue-600 hover:underline cursor-pointer"
                 >
                   See Reviews →
