@@ -1,10 +1,13 @@
-const API_URL = 'http://localhost:3000/api';
+// Use environment variable for API URL
+const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
+console.log('Using API_URL:', API_URL);
 
 export const listingService = {
   // Get all listings
   getAllListings: async () => {
     try {
-      const response = await fetch(`${API_URL}/listing`, {
+      console.log('Fetching listings from:', `${API_URL}/api/listing`);
+      const response = await fetch(`${API_URL}/api/listing`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -28,7 +31,7 @@ export const listingService = {
       // Log the data being sent
       console.log('Sending listing data:', listingData);
 
-      const response = await fetch(`${API_URL}/listing`, {
+      const response = await fetch(`${API_URL}/api/listing`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +58,7 @@ export const listingService = {
 
   getListingById: async (id) => {
     try {
-      const response = await fetch(`${API_URL}/listing/${id}`);
+      const response = await fetch(`${API_URL}/api/listing/${id}`);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Failed to fetch listing');
