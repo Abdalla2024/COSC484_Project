@@ -3,8 +3,9 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../auth/firebaseconfig';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
-console.log('API_URL:', API_URL);
+// Temporarily hardcode the preview URL
+const API_URL = 'https://cosc-484-project-api-git-aa-60834f-abdalla-abdelmagids-projects.vercel.app';
+console.log('Using hardcoded API_URL in Messages:', API_URL);
 
 function Messages() {
   const [user, loading] = useAuthState(auth);

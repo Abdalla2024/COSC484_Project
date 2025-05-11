@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
+// Temporarily hardcode the preview URL
+const API_URL = 'https://cosc-484-project-api-git-aa-60834f-abdalla-abdelmagids-projects.vercel.app';
+console.log('Using hardcoded API_URL:', API_URL);
 
 export const listingService = {
   // Get all listings
