@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import ListingCard from '../components/ListingCard';
+import EditListingModal from '../components/EditListingModal';
+import listingService from '../services/listingService';
 
 function Listing() {
   const [activeFilter, setActiveFilter] = useState('all');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedListing, setSelectedListing] = useState(null);
   
   // This would normally come from your backend
   const mockListings = [
@@ -35,6 +39,24 @@ function Listing() {
     { id: 'offers', label: 'Has Offers' },
     { id: 'recent', label: 'Recently Added' }
   ];
+
+  const handleEdit = (listing) => {
+    setSelectedListing(listing);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async (updatedData) => {
+    try {
+      const updated = await listingService.updateListing(selectedListing._id, updatedData);
+      console.log('Listing updated:', updated);
+  
+      // Update local state if you're storing real listings
+      setIsEditModalOpen(false);
+      setSelectedListing(null);
+    } catch (error) {
+      console.error('Error updating listing:', error);
+    }
+  };
 
   const filteredListings = mockListings.filter(listing => {
     switch (activeFilter) {
@@ -95,7 +117,12 @@ function Listing() {
           {/* Listings Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredListings.map(listing => (
-              <ListingCard key={listing.id} listing={listing} />
+              <ListingCard 
+                key={listing.id} 
+                listing={listing} 
+                onEdit={handleEdit}
+                showEditButton={true}
+              />
             ))}
           </div>
 
@@ -107,6 +134,17 @@ function Listing() {
           )}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      <EditListingModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedListing(null);
+        }}
+        listing={selectedListing}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 }

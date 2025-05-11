@@ -68,6 +68,29 @@ export const listingService = {
       console.error('Error fetching listing:', error);
       throw error;
     }
+  },
+  updateListing: async (id, updateData) => {
+    try {
+       // Log the data being sent
+       console.log('Sending updated listing data:', updateData);
+
+       const response = await fetch(`${API_URL}/listing/${id}`, {
+         method: 'PATCH',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify(updateData)
+       });
+ 
+       if (!response.ok) {
+         const error = await response.json();
+         throw new Error(error.error || 'Failed to update listing');
+       }
+       return await response.json();
+
+    } catch(error){
+      console.error('Error updating this listing try again later')
+    }
   }
 };
 
