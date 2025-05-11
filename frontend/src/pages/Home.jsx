@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ListingCard from '../components/ListingCard';
 import listingService from '../services/listingService';
+import useDebounce from '../hooks/useDebounce';
+
+const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 
 
 function Home() {
@@ -9,6 +12,8 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchValue, setSearchValue] = useState('');
+  const debouncedValue = useDebounce(searchValue, 500);
 
 
   const categories = ['Textbooks', 'Electronics', 'Furniture', 'Clothing', 'School Supplies', 'Dorm Essentials',
@@ -33,6 +38,37 @@ function Home() {
 
 
   }, []);
+
+  useEffect(() => {
+    const searchListings = async () => {
+      if (!debouncedValue) {
+        try {
+          const data = await listingService.getAllListings();
+          setListings(data);
+        } catch (err) {
+          console.error('Error fetching all listings:', err);
+        }
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/api/search/listings?q=${debouncedValue}`);
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.status}`);
+        }
+        const data = await response.json();
+        setListings(data);
+      } catch (err) {
+        console.error('Search error:', err);
+      }
+    };
+
+    searchListings();
+  }, [debouncedValue]);
+
+  const handleSearch = (e) => {
+    setSearchValue(e.target.value);
+  };
 
   const filteredListings = selectedCategory
     ? listings.filter(listing => listing.category === selectedCategory)
@@ -66,6 +102,8 @@ function Home() {
               type="text"
               placeholder="Search for items..."
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-yellow-500"
+              value={searchValue}
+              onChange={handleSearch}
             />
           </div>
 
@@ -101,7 +139,7 @@ function Home() {
           <div className="p-6 max-w-[calc(100vw-16rem)]">
             {filteredListings.length === 0 ? (
               <div className="text-center text-gray-600 mt-8">
-                No listings found{selectedCategory ? ` in ${selectedCategory}` : ''}
+                No listings found{selectedCategory ? ` in ${selectedCategory}` : ''}{searchValue ? ` for "${searchValue}"` : ''}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">

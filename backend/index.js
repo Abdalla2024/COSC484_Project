@@ -15,8 +15,14 @@ const MONGODB_URI = process.env.MONGODB_URI
 const Listing = require('./models/listing')
 const User = require('./models/user')
 const listingRoutes = require('./routes/listing.route')
+<<<<<<< HEAD
 const checkoutRoutes = require('./routes/checkout.route');
 const conversationRoutes = require('./routes/conversation.route')
+=======
+const messageRoutes = require('./routes/message.route')
+const userRoutes = require('./routes/user.route')
+const searchRoutes  = require('./routes/search.route')
+>>>>>>> 9407fe1 (Added search functionality for messaging and listings)
 
 >>>>>>> ddb55d6 (Starting stripe implementation in backend)
 
@@ -52,6 +58,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'API is running' });
 });
 
+<<<<<<< HEAD
 // ── Listing Endpoints 
 // GET all listings
 app.get('/api/listing', async (req, res, next) => {
@@ -79,6 +86,13 @@ app.get('/api/listing/:id', async (req, res, next) => {
 app.use('/api/checkout', checkoutRoutes);
 
 app.use('/api/conversation', conversationRoutes)
+=======
+// Use the routes
+app.use('/api/listing', listingRoutes)
+app.use('/api/messages', messageRoutes)
+app.use('/api/users', userRoutes)
+app.use('/api/search', searchRoutes)
+>>>>>>> 9407fe1 (Added search functionality for messaging and listings)
 
 
 // Root route

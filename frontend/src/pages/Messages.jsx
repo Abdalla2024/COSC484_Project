@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../auth/firebaseconfig';
 import { useNavigate } from 'react-router-dom';
+import useDebounce from '../hooks/useDebounce';
 
 const API_URL = 'http://localhost:5000/api';
 
@@ -13,6 +14,12 @@ function Messages() {
   const [newMessage, setNewMessage] = useState('');
   const [conversations, setConversations] = useState([]);
   const [unreadCounts, setUnreadCounts] = useState({});
+<<<<<<< HEAD
+=======
+  const [searchValue, setSearchValue] = useState('');
+  const debouncedValue = useDebounce(searchValue, 500);
+  const messagesEndRef = useRef(null);
+>>>>>>> 9407fe1 (Added search functionality for messaging and listings)
 
   const formatTimeAgo = (timestamp) => {
     const now = new Date();
@@ -64,6 +71,39 @@ function Messages() {
       fetchConversations();
     }
   }, [user, loading, navigate]);
+
+  // Add effect for search
+  useEffect(() => {
+    if (!debouncedValue) {
+      fetchConversations();
+      return;
+    }
+
+    const searchConversations = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/search/messages?q=${debouncedValue}`, {
+          credentials: 'include'
+        });
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.status}`);
+        }
+        const data = await response.json();
+        
+        // Filter conversations based on search results
+        const filteredConversations = conversations.filter(convo => 
+          data.some(msg => 
+            msg.senderId === convo.firebaseId || msg.receiverId === convo.firebaseId
+          )
+        );
+        
+        setConversations(filteredConversations);
+      } catch (err) {
+        console.error('Search error:', err);
+      }
+    };
+
+    searchConversations();
+  }, [debouncedValue]);
 
   const fetchConversations = async () => {
     try {
@@ -215,9 +255,12 @@ function Messages() {
               type="text"
               placeholder="Search conversations..."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
             />
           </div>
           <div className="space-y-2">
+<<<<<<< HEAD
             {conversations.map((convo) => (
               <div
                 key={convo.firebaseId}
@@ -246,14 +289,55 @@ function Messages() {
                       <span className="text-xs text-gray-500">
                         {convo.lastMessage ? formatTimeAgo(convo.lastMessage.timestamp) : ''}
                       </span>
+=======
+            {conversations.length === 0 ? (
+              <div className="text-center text-gray-500 py-4">
+                {searchValue ? 'No conversations found' : 'No conversations yet'}
+              </div>
+            ) : (
+              conversations.map((convo) => (
+                <div
+                  key={convo.firebaseId}
+                  className={`p-3 rounded-lg cursor-pointer hover:bg-gray-100 ${
+                    selectedUser?.firebaseId === convo.firebaseId ? 'bg-gray-100' : ''
+                  }`}
+                  onClick={() => handleSelectUser(convo)}
+                >
+                  <div className="flex items-center space-x-3">
+                    {convo.photoURL ? (
+                      <img
+                        src={convo.photoURL}
+                        alt={convo.displayName}
+                        className="w-12 h-12 rounded-full"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500 text-lg">
+                          {convo.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center space-x-2">
+                          <h3 className="font-semibold truncate text-black">{convo.displayName}</h3>
+                          {unreadCounts[convo.firebaseId]?.count > 0 && (
+                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                          )}
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          {convo.lastMessage ? formatTimeAgo(convo.lastMessage.timestamp) : ''}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 truncate">
+                        {convo.lastMessage ? convo.lastMessage.content : 'No messages yet'}
+                      </p>
+>>>>>>> 9407fe1 (Added search functionality for messaging and listings)
                     </div>
-                    <p className="text-sm text-gray-600 truncate">
-                      {convo.lastMessage ? convo.lastMessage.content : 'No messages yet'}
-                    </p>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

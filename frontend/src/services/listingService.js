@@ -69,14 +69,13 @@ export const listingService = {
       throw error;
     }
   },
-
   updateListing: async (id, updateData) => {
     try {
        // Log the data being sent
        console.log('Sending updated listing data:', updateData);
 
        const response = await fetch(`${API_URL}/listing/${id}`, {
-         method: 'PUT',
+         method: 'PATCH',
          headers: {
            'Content-Type': 'application/json',
          },
