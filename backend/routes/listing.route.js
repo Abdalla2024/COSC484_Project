@@ -5,9 +5,11 @@ const Listing = require('../models/listing');
 // Get all listings
 router.get('/', async (req, res) => {  
     try {
-        const listings = await Listing.find();
+        const ListingModel = req.db.model('Listing', Listing.schema);
+        const listings = await ListingModel.find();
         res.status(200).json(listings);
     } catch (error) {
+        console.error('Error fetching listings:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -15,9 +17,11 @@ router.get('/', async (req, res) => {
 // Create a new listing
 router.post('/', async (req, res) => {
     try {
-        const listing = await Listing.create(req.body);
+        const ListingModel = req.db.model('Listing', Listing.schema);
+        const listing = await ListingModel.create(req.body);
         res.status(201).json(listing);
     } catch (error) {
+        console.error('Error creating listing:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -26,12 +30,14 @@ router.post('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const listing = await Listing.findById(id);
+        const ListingModel = req.db.model('Listing', Listing.schema);
+        const listing = await ListingModel.findById(id);
         if (!listing) {
             return res.status(404).json({ error: 'Listing not found' });
         }
         res.status(200).json(listing);
     } catch (error) {
+        console.error('Error fetching listing:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -40,12 +46,14 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const listing = await Listing.findByIdAndUpdate(id, req.body, { new: true });
+        const ListingModel = req.db.model('Listing', Listing.schema);
+        const listing = await ListingModel.findByIdAndUpdate(id, req.body, { new: true });
         if (!listing) {
             return res.status(404).json({ error: 'Listing not found' });
         }
         res.status(200).json(listing);
     } catch (error) {
+        console.error('Error updating listing:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -54,12 +62,14 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const listing = await Listing.findByIdAndDelete(id);
+        const ListingModel = req.db.model('Listing', Listing.schema);
+        const listing = await ListingModel.findByIdAndDelete(id);
         if (!listing) {
             return res.status(404).json({ error: 'Listing not found' });
         }
         res.status(200).json({ message: 'Listing deleted successfully' });
     } catch (error) {
+        console.error('Error deleting listing:', error);
         res.status(500).json({ error: error.message });
     }
 });

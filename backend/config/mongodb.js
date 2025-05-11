@@ -3,57 +3,52 @@ const mongoose = require('mongoose');
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/cosc484project';
 console.log('MongoDB URI:', MONGODB_URI);
 
-let cachedConnection = null;
+// Create a connection pool
+const options = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  maxPoolSize: 10,
+  minPoolSize: 5
+};
 
-const connectDB = async () => {
+// Create a connection pool
+let pool = null;
+
+const getConnection = async () => {
   try {
-    // If we have a cached connection, return it
-    if (cachedConnection) {
-      console.log('Using cached MongoDB connection');
-      return cachedConnection;
+    if (!pool) {
+      console.log('Creating new connection pool...');
+      pool = await mongoose.createConnection(MONGODB_URI, options);
+      
+      pool.on('connected', () => {
+        console.log('Mongoose connected to MongoDB');
+      });
+      
+      pool.on('error', (err) => {
+        console.error('Mongoose connection error:', err);
+        pool = null;
+      });
+      
+      pool.on('disconnected', () => {
+        console.log('Mongoose disconnected from MongoDB');
+        pool = null;
+      });
     }
-
-    console.log('Attempting to connect to MongoDB...');
-    const connection = await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
-    });
-
-    console.log('MongoDB connected successfully');
-    
-    // Cache the connection
-    cachedConnection = connection;
-    
-    // Add connection event listeners
-    mongoose.connection.on('connected', () => {
-      console.log('Mongoose connected to MongoDB');
-    });
-    
-    mongoose.connection.on('error', (err) => {
-      console.error('Mongoose connection error:', err);
-      cachedConnection = null;
-    });
-    
-    mongoose.connection.on('disconnected', () => {
-      console.log('Mongoose disconnected from MongoDB');
-      cachedConnection = null;
-    });
-
-    return connection;
+    return pool;
   } catch (error) {
-    console.error('MongoDB connection error:', error);
-    cachedConnection = null;
+    console.error('Error creating connection pool:', error);
+    pool = null;
     throw error;
   }
 };
 
-const closeDB = async () => {
+const closeConnection = async () => {
   try {
-    if (cachedConnection) {
-      await mongoose.connection.close();
-      cachedConnection = null;
+    if (pool) {
+      await pool.close();
+      pool = null;
       console.log('MongoDB connection closed');
     }
   } catch (error) {
@@ -63,6 +58,6 @@ const closeDB = async () => {
 };
 
 module.exports = {
-  connectDB,
-  closeDB
+  getConnection,
+  closeConnection
 }; 

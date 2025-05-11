@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express')
 const cors = require('cors')
-const { connectDB } = require('./config/mongodb')
+const { getConnection } = require('./config/mongodb')
 const Listing = require('./models/listing')
 const User = require('./models/user')
 const listingRoutes = require('./routes/listing.route')
@@ -49,6 +49,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// Add database connection middleware
+app.use(async (req, res, next) => {
+  try {
+    const connection = await getConnection();
+    req.db = connection;
+    next();
+  } catch (error) {
+    console.error('Database connection error:', error);
+    res.status(500).json({ error: 'Database connection failed' });
+  }
+});
+
 // Use the routes
 app.use('/api/listing', listingRoutes)
 app.use('/api/messages', messageRoutes)
@@ -90,6 +102,9 @@ app.use((err, req, res, next) => {
         stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
 })
+
+// Export the Express app for serverless environment
+module.exports = app;
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
