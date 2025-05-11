@@ -40,14 +40,34 @@ app.get('/', (req, res) => {
   res.json({ message: 'API is running' });
 });
 
-// User sync endpoint (simplified)
+// Listings endpoint
+app.get('/api/listing', (req, res) => {
+  console.log('Fetching all listings');
+  res.json([]);
+});
+
+app.get('/api/listing/:id', (req, res) => {
+  console.log(`Fetching listing with id: ${req.params.id}`);
+  res.json({
+    _id: req.params.id,
+    title: 'Sample Listing',
+    description: 'This is a sample listing',
+    price: 100,
+    condition: 'New',
+    category: 'Other',
+    seller: 'user123',
+    createdAt: new Date()
+  });
+});
+
+// User endpoints
 app.post('/api/users/sync', (req, res) => {
   try {
     console.log('Received sync request with data:', req.body);
     const { uid, email, displayName, photoURL } = req.body;
     
-    // Just return the data sent in the request for testing
     res.status(200).json({
+      _id: '123456789',
       firebaseId: uid,
       email,
       displayName,
@@ -60,12 +80,72 @@ app.post('/api/users/sync', (req, res) => {
   }
 });
 
-// Simple messages endpoint
+app.get('/api/users', (req, res) => {
+  console.log('Fetching all users');
+  res.json([]);
+});
+
+app.get('/api/users/:userId', (req, res) => {
+  console.log(`Fetching user with id: ${req.params.userId}`);
+  res.json({
+    _id: req.params.userId,
+    firebaseId: req.params.userId,
+    displayName: 'Sample User',
+    email: 'user@example.com',
+    photoURL: '',
+  });
+});
+
+// Messages endpoints
+app.post('/api/messages', (req, res) => {
+  try {
+    console.log('Creating message with data:', req.body);
+    const { senderId, receiverId, content } = req.body;
+    
+    const message = {
+      _id: Math.random().toString(36).substring(7),
+      senderId,
+      receiverId,
+      content,
+      read: false,
+      timestamp: new Date()
+    };
+    
+    res.status(201).json(message);
+  } catch (error) {
+    console.error('Error creating message:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/messages/user/:userId', (req, res) => {
   const userId = req.params.userId;
   console.log(`Getting messages for user: ${userId}`);
-  // Return empty array for testing
   res.json([]);
+});
+
+app.get('/api/messages/:userId/:otherUserId', (req, res) => {
+  const { userId, otherUserId } = req.params;
+  console.log(`Getting conversation between ${userId} and ${otherUserId}`);
+  res.json([]);
+});
+
+app.put('/api/messages/read/:userId/:otherUserId', (req, res) => {
+  const { userId, otherUserId } = req.params;
+  console.log(`Marking messages as read for ${userId} from ${otherUserId}`);
+  res.json({ success: true });
+});
+
+app.get('/api/messages/unread/:userId/:otherUserId', (req, res) => {
+  const { userId, otherUserId } = req.params;
+  console.log(`Getting unread count between ${userId} and ${otherUserId}`);
+  res.json({ count: 0 });
+});
+
+app.get('/api/messages/unread/count/:userId', (req, res) => {
+  const userId = req.params.userId;
+  console.log(`Getting total unread count for user: ${userId}`);
+  res.json({ count: 0 });
 });
 
 // Error handling middleware
