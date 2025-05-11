@@ -60,7 +60,7 @@ function Orders() {
   return (
     <div className="min-h-screen pt-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">My Orders</h1>
+        <h1 className="text-3xl font-bold mb-8 text-black">My Orders</h1>
 
         {/* Orders List */}
         <div className="space-y-6">
