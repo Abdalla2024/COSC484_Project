@@ -67,12 +67,7 @@ app.use('/api/users', userRoutes)
 
 // Root route
 app.get('/', (req, res) => {
-    res.json({ 
-        message: 'COSC484 Project API is running',
-        environment: process.env.NODE_ENV,
-        hasMongoUri: !!process.env.MONGODB_URI,
-        corsOrigin: corsOptions.origin
-    });
+    res.json({ message: 'Hello World! API is running.' });
 });
 
 // Test route for environment variables
@@ -81,34 +76,24 @@ app.get('/api/test-env', (req, res) => {
         nodeEnv: process.env.NODE_ENV,
         hasMongoUri: !!process.env.MONGODB_URI,
         mongoUriLength: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0,
-        corsOrigin: corsOptions.origin,
-        port: process.env.PORT
+        vercelEnv: process.env.VERCEL_ENV,
+        allEnvKeys: Object.keys(process.env)
     });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Error occurred:', err);
-    console.error('Error stack:', err.stack);
-    console.error('Request details:', {
-        method: req.method,
-        url: req.url,
-        headers: req.headers,
-        body: req.body
-    });
-    res.status(500).json({ 
-        error: err.message,
-        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
-    });
+    console.error('Error:', err);
+    res.status(500).json({ error: err.message });
 })
 
-// Export the Express app for serverless environment
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+// For Vercel
 module.exports = app;
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`MongoDB URI: ${process.env.MONGODB_URI ? 'Set' : 'Not set'}`);
-    console.log('CORS configuration:', corsOptions);
-})
