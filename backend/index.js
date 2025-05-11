@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express')
 const cors = require('cors')
-const { getConnection } = require('./config/mongodb')
+const { connectDB } = require('./config/mongodb')
 const Listing = require('./models/listing')
 const User = require('./models/user')
 const listingRoutes = require('./routes/listing.route')
@@ -49,11 +49,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// Add database connection middleware
+// Connect to MongoDB before handling any requests
 app.use(async (req, res, next) => {
   try {
-    const connection = await getConnection();
-    req.db = connection;
+    await connectDB();
     next();
   } catch (error) {
     console.error('Database connection error:', error);

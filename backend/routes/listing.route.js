@@ -5,8 +5,7 @@ const Listing = require('../models/listing');
 // Get all listings
 router.get('/', async (req, res) => {  
     try {
-        const ListingModel = req.db.model('Listing', Listing.schema);
-        const listings = await ListingModel.find();
+        const listings = await Listing.find();
         res.status(200).json(listings);
     } catch (error) {
         console.error('Error fetching listings:', error);
@@ -17,8 +16,7 @@ router.get('/', async (req, res) => {
 // Create a new listing
 router.post('/', async (req, res) => {
     try {
-        const ListingModel = req.db.model('Listing', Listing.schema);
-        const listing = await ListingModel.create(req.body);
+        const listing = await Listing.create(req.body);
         res.status(201).json(listing);
     } catch (error) {
         console.error('Error creating listing:', error);
@@ -30,8 +28,7 @@ router.post('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const ListingModel = req.db.model('Listing', Listing.schema);
-        const listing = await ListingModel.findById(id);
+        const listing = await Listing.findById(id);
         if (!listing) {
             return res.status(404).json({ error: 'Listing not found' });
         }
@@ -46,8 +43,7 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const ListingModel = req.db.model('Listing', Listing.schema);
-        const listing = await ListingModel.findByIdAndUpdate(id, req.body, { new: true });
+        const listing = await Listing.findByIdAndUpdate(id, req.body, { new: true });
         if (!listing) {
             return res.status(404).json({ error: 'Listing not found' });
         }
@@ -62,8 +58,7 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const ListingModel = req.db.model('Listing', Listing.schema);
-        const listing = await ListingModel.findByIdAndDelete(id);
+        const listing = await Listing.findByIdAndDelete(id);
         if (!listing) {
             return res.status(404).json({ error: 'Listing not found' });
         }
