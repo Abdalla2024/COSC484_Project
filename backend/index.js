@@ -8,6 +8,7 @@ const Message = require('./models/message');
 const User    = require('./models/user');
 const Review  = require('./models/review');
 const reviewRoutes = require('./routes/review.route');
+const checkoutRoutes = require('./routes/checkout.route');
 
 const app = express();
 app.use(cors());
@@ -31,6 +32,9 @@ app.get('/', (req, res) => {
 
 // Mount review routes
 app.use('/api/reviews', reviewRoutes);
+
+//checkout route
+app.use('api/checkout', checkoutRoutes);
 
 // ── LISTING ENDPOINTS ───────────────────────────────────────────────────────────
 // GET all listings
