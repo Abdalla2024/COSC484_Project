@@ -98,18 +98,8 @@ function Checkout() {
             </div>
           </div>
         </div>
-        {/* Payment Form */}
-        {/* <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Payment Information</h2>
-          <div className="space-y-4"> */}
-            {/* Stripe Elements would go here */}
-            {/* <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-              <p className="text-gray-500">Stripe Payment Form will be integrated here</p>
-            </div>
-          </div>
-        </div> */}
 
-        {/* Proceed Button */}
+        {/* Proceed to Payment Button */}
         <button
           onClick={handlePayment}
           disabled={isLoading}
