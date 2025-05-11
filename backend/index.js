@@ -222,6 +222,28 @@ app.post('/api/listing', async (req, res, next) => {
   }
 });
 
+// CREATE a new listing
+app.post('/api/listing', async (req, res, next) => {
+  try {
+    console.log('Creating new listing with data:', req.body);
+    
+    // Validate sellerId is a valid ObjectId
+    if (req.body.sellerId && !mongoose.Types.ObjectId.isValid(req.body.sellerId)) {
+      console.log('Invalid sellerId format:', req.body.sellerId);
+      return res.status(400).json({ error: 'Invalid sellerId format' });
+    }
+    
+    // Create the listing
+    const listing = await Listing.create(req.body);
+    console.log('Created listing:', listing);
+    
+    res.status(201).json(listing);
+  } catch (err) {
+    console.error('Error creating listing:', err);
+    next(err);
+  }
+});
+
 //Update a listing
 app.patch('/api/listing/:id', async (req, res) => {
     try {
