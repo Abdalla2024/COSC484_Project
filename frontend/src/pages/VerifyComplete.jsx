@@ -16,7 +16,7 @@ function VerifyComplete() {
         console.log(mode, oobCode, params);
         if (mode === "verifyEmail" && oobCode) {
             applyActionCode(auth, oobCode).then(() => {
-                //alert("Email Verified");
+                //alert is ("Email Verified");
                 setIsVerified(true);
                 navigate("https://cosc-484-project-front.vercel.app", { replace: true });
             })
