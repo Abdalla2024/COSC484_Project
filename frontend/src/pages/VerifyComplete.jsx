@@ -18,9 +18,10 @@ function VerifyComplete() {
             applyActionCode(auth, oobCode).then(() => {
                 //alert("Email Verified");
                 setIsVerified(true);
-                navigate("/");
+                navigate("https://cosc-484-project-front.vercel.app", { replace: true });
             })
                 .catch((error) => {
+                    navigate("https://cosc-484-project-front.vercel.app", { replace: true });
                     console.error("Verification Error", error.message);
                 });
         }
