@@ -62,7 +62,7 @@ function Sell() {
         try {
           const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
             
-          console.log('Fetching user data from:', `${API_URL}/api/users/sync`, 'Environment:', isDevelopment ? 'development' : 'production');
+          console.log('Fetching user data from:', `${API_URL}/api/users/sync`);
           
           const res = await fetch(`${API_URL}/api/users/sync`, {
             method: 'POST',
