@@ -13,6 +13,7 @@ function Listing() {
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [similarListings, setSimilarListings] = useState([]);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -61,6 +62,33 @@ function Listing() {
 
     fetchListing();
   }, [id]);
+
+  // Fetch random similar listings
+  useEffect(() => {
+    const fetchSimilarListings = async () => {
+      try {
+        // Get all listings
+        const allListings = await listingService.getAllListings();
+        
+        // Filter out the current listing and only keep active listings
+        const availableListings = allListings.filter(item => 
+          item._id !== id && item.status === 'active'
+        );
+        
+        // Shuffle and pick 3 random listings
+        const shuffled = availableListings.sort(() => 0.5 - Math.random());
+        const randomListings = shuffled.slice(0, 3);
+        
+        setSimilarListings(randomListings);
+      } catch (err) {
+        console.error('Error fetching similar listings:', err);
+      }
+    };
+
+    if (!loading && listing) {
+      fetchSimilarListings();
+    }
+  }, [id, listing, loading]);
 
   const conditions = [
     { value: 'new', label: 'New' },
@@ -321,21 +349,18 @@ function Listing() {
         <div className="mt-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Similar Listings</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((num) => (
-              <ListingCard
-                key={`similar-${num}`}
-                listing={{
-                  id: `similar-${num}`,
-                  title: `Similar Item ${num}`,
-                  description: "Another great item you might be interested in",
-                  price: (Math.random() * 100).toFixed(2),
-                  status: "active",
-                  imageUrl: `https://picsum.photos/seed/${num + 10}/800/600`,
-                  date: "2024-03-15",
-                  offers: Math.floor(Math.random() * 5)
-                }}
-              />
-            ))}
+            {similarListings.length > 0 ? (
+              similarListings.map((item) => (
+                <ListingCard
+                  key={item._id}
+                  listing={item}
+                />
+              ))
+            ) : (
+              <p className="col-span-3 text-center text-gray-500 py-8">
+                No similar listings found
+              </p>
+            )}
           </div>
         </div>
       </div>
