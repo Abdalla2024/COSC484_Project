@@ -77,9 +77,13 @@ function Checkout() {
           <h2 className="text-xl font-semibold mb-4 text-black">Item Summary</h2>
           <div className="flex gap-6">
             <img 
-              src={listing.image} 
+              src={listing.images?.[0] || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'} 
               alt={listing.title}
               className="w-48 h-48 object-cover rounded-lg"
+              onError={(e) => {
+                e.target.onerror = null; // Prevent infinite loop
+                e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+              }}
             />
             <div className="flex-1">
               <h3 className="text-xl font-medium mb-2 text-black">{listing.title}</h3>
