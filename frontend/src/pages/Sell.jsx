@@ -60,7 +60,13 @@ function Sell() {
     if (user) {
       const fetchUserMongoId = async () => {
         try {
-          const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
+          const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+          const API_URL = isDevelopment 
+            ? 'http://localhost:3000' 
+            : 'https://cosc484-project-api.vercel.app';
+            
+          console.log('Fetching user data from:', `${API_URL}/api/users/sync`, 'Environment:', isDevelopment ? 'development' : 'production');
+          
           const res = await fetch(`${API_URL}/api/users/sync`, {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
@@ -71,6 +77,11 @@ function Sell() {
               photoURL: user.photoURL
             })
           });
+          
+          if (!res.ok) {
+            throw new Error(`Failed to sync user: ${res.status} ${res.statusText}`);
+          }
+          
           const userData = await res.json();
           console.log('Current user MongoDB ID:', userData._id);
           setCurrentUserId(userData._id);
