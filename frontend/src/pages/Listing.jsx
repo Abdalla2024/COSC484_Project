@@ -14,7 +14,6 @@ function Listing() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [similarListings, setSimilarListings] = useState([]);
-  const [loadingSimilar, setLoadingSimilar] = useState(true);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -67,41 +66,32 @@ function Listing() {
     fetchListing();
   }, [id]);
 
-  // Fetch similar listings based on category
-  const fetchSimilarListings = async (category) => {
-    try {
-      setLoadingSimilar(true);
-      // Get all listings
-      const allListings = await listingService.getAllListings();
-      
-      // Filter: same category, not the current listing, active status, limit to 3
-      const filtered = allListings
-        .filter(item => 
-          item._id !== id && 
-          item.category === category &&
-          item.status === 'active'
-        )
-        .slice(0, 3);
-
-      // If we don't have enough listings in the same category, get some random ones
-      if (filtered.length < 3) {
-        const randomListings = allListings
-          .filter(item => item._id !== id && item.status === 'active')
-          .filter(item => !filtered.some(f => f._id === item._id))
-          .sort(() => 0.5 - Math.random())
-          .slice(0, 3 - filtered.length);
+  // Fetch random similar listings
+  useEffect(() => {
+    const fetchSimilarListings = async () => {
+      try {
+        // Get all listings
+        const allListings = await listingService.getAllListings();
         
-        filtered.push(...randomListings);
+        // Filter out the current listing and only keep active listings
+        const availableListings = allListings.filter(item => 
+          item._id !== id && item.status === 'active'
+        );
+        
+        // Shuffle and pick 3 random listings
+        const shuffled = availableListings.sort(() => 0.5 - Math.random());
+        const randomListings = shuffled.slice(0, 3);
+        
+        setSimilarListings(randomListings);
+      } catch (err) {
+        console.error('Error fetching similar listings:', err);
       }
-      
-      console.log('Similar listings:', filtered);
-      setSimilarListings(filtered);
-    } catch (err) {
-      console.error('Error fetching similar listings:', err);
-    } finally {
-      setLoadingSimilar(false);
+    };
+
+    if (!loading && listing) {
+      fetchSimilarListings();
     }
-  };
+  }, [id, listing, loading]);
 
   const conditions = [
     { value: 'new', label: 'New' },
@@ -362,14 +352,17 @@ function Listing() {
         <div className="mt-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Similar Listings</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loadingSimilar ? (
-              <div className="col-span-3 text-center py-8">Loading similar listings...</div>
-            ) : similarListings.length > 0 ? (
-              similarListings.map(item => (
-                <ListingCard key={item._id} listing={item} />
+            {similarListings.length > 0 ? (
+              similarListings.map((item) => (
+                <ListingCard
+                  key={item._id}
+                  listing={item}
+                />
               ))
             ) : (
-              <div className="col-span-3 text-center py-8">No similar listings found</div>
+              <p className="col-span-3 text-center text-gray-500 py-8">
+                No similar listings found
+              </p>
             )}
           </div>
         </div>

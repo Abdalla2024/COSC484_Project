@@ -8,14 +8,19 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
-      "dest": "/index.js",
+      "src": "/api/(.*)",
+      "dest": "index.js",
+      "methods": ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "https://cosc-484-project-front.vercel.app",
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Methods": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-        "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
+        "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization",
+        "Access-Control-Max-Age": "86400"
       }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "index.js"
     }
   ]
-} 
+}

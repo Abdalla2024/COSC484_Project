@@ -1,92 +1,87 @@
 # TU Marketplace
 
-TU Marketplace is a comprehensive platform designed for university students to buy, sell, and exchange goods within their campus community. The application combines modern e-commerce functionality with social features to create a seamless and secure marketplace experience.
+TU Marketplace is a digital marketplace platform designed specifically for college students to buy and sell textbooks, electronics, furniture, clothing, and other essentials within their campus community.
 
 ## Features
 
-- **User Authentication**: Secure login and registration with Firebase
-- **Listings Management**: Create, browse, update, and delete product listings
-- **Direct Messaging**: In-app messaging between buyers and sellers
-- **Search & Filtering**: Find listings by category, price range, and keywords
-- **Payment Processing**: Secure checkout via Stripe integration
-- **User Profiles**: Customizable profiles with ratings and reviews
-- **Order Management**: Track purchases and sales
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **User Authentication**: Secure login and registration using Firebase authentication
+- **Product Listings**: Create, view, edit, and delete product listings with multiple images
+- **Categories**: Browse items by categories like Textbooks, Electronics, Furniture, etc.
+- **Search & Filter**: Find items based on keywords, price range, and condition
+- **Messaging**: Direct communication between buyers and sellers
+- **User Profiles**: View seller information and reviews
+- **Responsive Design**: Fully optimized for mobile, tablet, and desktop
+- **Payment Processing**: Secure checkout using Stripe
+- **Similar Items**: View related listings that might interest you
 
 ## Tech Stack
 
-### Frontend
+- **Frontend**: React with Vite, Tailwind CSS
+- **Backend**: Node.js, Express
+- **Database**: MongoDB
+- **Authentication**: Firebase Auth
+- **Image Storage**: Cloudinary
+- **Payment Processing**: Stripe
+- **Deployment**: Vercel
 
-- React.js with Vite
-- TailwindCSS for styling
-- React Router for client-side routing
-- Firebase Authentication
-- Stripe for payment processing
-- Deployed on Vercel
-
-### Backend
-
-- Node.js with Express
-- MongoDB for database (with Mongoose ORM)
-- RESTful API architecture
-- Stripe API integration
-- Deployed on Vercel
-
-## Setup Instructions
+## Getting Started
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
+- Node.js (v14+)
 - npm or yarn
 - MongoDB account
 - Firebase account
-- Stripe account
+- Cloudinary account
+- Stripe account (for payment features)
 
 ### Installation
 
 1. Clone the repository
 
    ```
-   git clone https://github.com/your-username/COSC484_Project.git
+   git clone https://github.com/yourusername/COSC484_Project.git
    cd COSC484_Project
    ```
 
-2. Install backend dependencies
+2. Install frontend dependencies
 
    ```
-   cd backend
+   cd frontend
    npm install
    ```
 
-3. Install frontend dependencies
-
-   ```
-   cd ../frontend
-   npm install
-   ```
-
-4. Start the backend server
+3. Install backend dependencies
 
    ```
    cd ../backend
+   npm install
+   ```
+
+### Running the Application
+
+1. Start the backend server
+
+   ```
+   cd backend
    npm run dev
    ```
 
-5. Start the frontend development server
+2. Start the frontend development server
 
    ```
-   cd ../frontend
+   cd frontend
    npm run dev
    ```
 
-6. Open your browser and navigate to `http://localhost:5173`
+3. Open your browser and navigate to `http://localhost:5173`
 
 ## Deployment
 
-The project is deployed on Vercel with the following URLs:
+The application is deployed using Vercel:
 
 - Frontend: https://cosc-484-project-front.vercel.app
-- Backend API: https://cosc-484-project-api.vercel.app
+- Backend: https://cosc-484-project-back.vercel.app
 
 # React + Vite
 
