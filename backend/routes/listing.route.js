@@ -56,7 +56,11 @@ router.get('/:id', async (req, res) => {
 router.patch('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const listing = await Listing.findByIdAndUpdate(id, req.body, { new: true });
+        const listing = await Listing.findOneAndUpdate(
+            { _id: id },
+            req.body,
+            { new: true }
+        );
         if (!listing) {
             return res.status(404).json({ error: 'Listing not found' });
         }
@@ -65,6 +69,7 @@ router.patch('/:id', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 // Delete a listing by id
 router.delete('/:id', async (req, res) => {
