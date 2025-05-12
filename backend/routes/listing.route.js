@@ -70,7 +70,6 @@ router.patch('/:id', async (req, res) => {
     }
 });
 
-
 // Delete a listing by id
 router.delete('/:id', async (req, res) => {
     try {
