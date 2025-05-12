@@ -63,7 +63,7 @@ function Checkout() {
   return (
     <div className="min-h-screen pt-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+        <h1 className="text-3xl font-bold mb-8 text-black">Checkout</h1>
         
         {isLoading ? (
           <p className="text-gray-500">Loading listing...</p>
@@ -74,7 +74,7 @@ function Checkout() {
 
         {/* Item Summary */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Item Summary</h2>
+          <h2 className="text-xl font-semibold mb-4 text-black">Item Summary</h2>
           <div className="flex gap-6">
             <img 
               src={listing.image} 
@@ -82,7 +82,7 @@ function Checkout() {
               className="w-48 h-48 object-cover rounded-lg"
             />
             <div className="flex-1">
-              <h3 className="text-xl font-medium mb-2">{listing.title}</h3>
+              <h3 className="text-xl font-medium mb-2 text-black">{listing.title}</h3>
               <p className="text-gray-600 mb-4">{listing.description}</p>
               <p className="text-3xl font-bold text-[#FFB800] mb-3">${listing.price.toFixed(2)}</p>
               <div className="space-y-2">
