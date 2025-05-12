@@ -3,6 +3,9 @@ import { useParams } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import listingService from '../services/listingService';
 
+// Use environment variable for API URL
+const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
+
 const stripePromise = loadStripe("pk_test_51R7L8iPKPGdvnNX7Q1z1VK2EszKUwsdiXL7fJedYyshWpvCeQy5cRkxUP9zoTM7BgzA5cWFEWsf9jmUF0VVe2E1H00vqWJfDGE");
 
 
@@ -30,7 +33,7 @@ function Checkout() {
   const handlePayment = async () => {
 
     try {
-      const response = await fetch('http://localhost:3000/api/checkout/create-checkout-session', {
+      const response = await fetch(`${API_URL}/api/checkout/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
