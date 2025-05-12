@@ -30,7 +30,7 @@ function Checkout() {
   const handlePayment = async () => {
 
     try {
-      const response = await fetch('http://localhost:5000/api/checkout/create-checkout-session', {
+      const response = await fetch('http://https://cosc-484-project-api.vercel.app/api/checkout/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
