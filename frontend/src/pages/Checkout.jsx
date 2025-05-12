@@ -41,7 +41,8 @@ function Checkout() {
         body: JSON.stringify({
           id: listing._id,
           title: listing.title,
-          price: listing.price
+          price: listing.price,
+          cancel_url: window.location.href
         })
       });
 
