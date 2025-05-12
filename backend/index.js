@@ -9,6 +9,7 @@ const User    = require('./models/user');
 const Review  = require('./models/review');
 const reviewRoutes = require('./routes/review.route');
 const checkoutRoutes = require('./routes/checkout.route');
+const searchRoutes = require('./routes/search.route')
 
 const app = express();
 app.use(cors());
@@ -35,8 +36,10 @@ app.use('/api/reviews', reviewRoutes);
 
 //checkout route
 app.use('/api/checkout', checkoutRoutes);
+app.use('/api/search',searchRoutes)
 
-// ── LISTING ENDPOINTS ───────────────────────────────────────────────────────────
+
+// ── LISTING ENDPOINTS 
 // GET all listings
 app.get('/api/listing', async (req, res, next) => {
   try {
@@ -217,7 +220,7 @@ app.post('/api/listing', async (req, res, next) => {
   }
 });
 
-// ── USER ENDPOINTS ──────────────────────────────────────────────────────────────
+// ── USER ENDPOINTS 
 // Sync (upsert) user on sign-in (returns full Mongo record including _id)
 app.post('/api/users/sync', async (req, res, next) => {
   try {
@@ -276,7 +279,7 @@ app.get('/api/users/:userId', async (req, res, next) => {
   }
 });
 
-// ── MESSAGING ENDPOINTS ────────────────────────────────────────────────────────
+// ── MESSAGING ENDPOINTS 
 // Send a new message
 app.post('/api/messages', async (req, res, next) => {
   try {
@@ -327,7 +330,7 @@ app.post('/api/messages', async (req, res, next) => {
   }
 });
 
-// ── Get all messages involving this Mongo userId ──
+// Get all messages involving this Mongo userId
 app.get('/api/messages/user/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -381,7 +384,7 @@ app.get('/api/messages/user/:userId', async (req, res) => {
   }
 });
 
-// ── Get one‐to‐one thread between two ObjectIds ──
+// Get one‐to‐one thread between two ObjectIds
 app.get('/api/messages/:userId/:otherUserId', async (req, res) => {
   try {
     const { userId, otherUserId } = req.params;
