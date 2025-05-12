@@ -12,7 +12,16 @@ const checkoutRoutes = require('./routes/checkout.route');
 const searchRoutes = require('./routes/search.route')
 
 const app = express();
-app.use(cors());
+
+// CORS Configuration
+const corsOptions = {
+  origin: ['https://cosc-484-project-front.vercel.app', 'http://localhost:5173'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -268,6 +277,20 @@ app.patch('/api/listing/:id', async (req, res, next) => {
     next(err);
   }
 });
+
+// DELETE a listing by ID
+app.delete('/api/listing/:id', async (req, res) => {
+  try {
+      const { id } = req.params;
+      const listing = await Listing.findByIdAndDelete(id);
+      if (!listing) {
+          return res.status(404).json({ error: 'Listing not found' });
+      }
+      res.status(200).json({ message: 'Listing deleted successfully' });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+}); 
 
 // ── USER ENDPOINTS 
 

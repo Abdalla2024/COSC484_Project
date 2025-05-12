@@ -13,6 +13,8 @@ function Listing() {
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [similarListings, setSimilarListings] = useState([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(true);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -52,6 +54,9 @@ function Listing() {
             console.error('Error fetching seller:', sellerErr);
           }
         }
+
+        // After getting the current listing, fetch similar listings
+        fetchSimilarListings(data.category);
       } catch (err) {
         setError(err.message || 'Failed to fetch listing');
       } finally {
@@ -61,6 +66,42 @@ function Listing() {
 
     fetchListing();
   }, [id]);
+
+  // Fetch similar listings based on category
+  const fetchSimilarListings = async (category) => {
+    try {
+      setLoadingSimilar(true);
+      // Get all listings
+      const allListings = await listingService.getAllListings();
+      
+      // Filter: same category, not the current listing, active status, limit to 3
+      const filtered = allListings
+        .filter(item => 
+          item._id !== id && 
+          item.category === category &&
+          item.status === 'active'
+        )
+        .slice(0, 3);
+
+      // If we don't have enough listings in the same category, get some random ones
+      if (filtered.length < 3) {
+        const randomListings = allListings
+          .filter(item => item._id !== id && item.status === 'active')
+          .filter(item => !filtered.some(f => f._id === item._id))
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 3 - filtered.length);
+        
+        filtered.push(...randomListings);
+      }
+      
+      console.log('Similar listings:', filtered);
+      setSimilarListings(filtered);
+    } catch (err) {
+      console.error('Error fetching similar listings:', err);
+    } finally {
+      setLoadingSimilar(false);
+    }
+  };
 
   const conditions = [
     { value: 'new', label: 'New' },
@@ -321,21 +362,15 @@ function Listing() {
         <div className="mt-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Similar Listings</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((num) => (
-              <ListingCard
-                key={`similar-${num}`}
-                listing={{
-                  id: `similar-${num}`,
-                  title: `Similar Item ${num}`,
-                  description: "Another great item you might be interested in",
-                  price: (Math.random() * 100).toFixed(2),
-                  status: "active",
-                  imageUrl: `https://picsum.photos/seed/${num + 10}/800/600`,
-                  date: "2024-03-15",
-                  offers: Math.floor(Math.random() * 5)
-                }}
-              />
-            ))}
+            {loadingSimilar ? (
+              <div className="col-span-3 text-center py-8">Loading similar listings...</div>
+            ) : similarListings.length > 0 ? (
+              similarListings.map(item => (
+                <ListingCard key={item._id} listing={item} />
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-8">No similar listings found</div>
+            )}
           </div>
         </div>
       </div>

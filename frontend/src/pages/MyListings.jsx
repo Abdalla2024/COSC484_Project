@@ -94,6 +94,11 @@ function MyListings() {
     }
   };
 
+  const handleDelete = (listingId) => {
+    // Remove the deleted listing from the state
+    setListings(prevListings => prevListings.filter(listing => listing._id !== listingId));
+  };
+
   const filteredListings = listings.filter(listing => {
     switch (activeFilter) {
       case 'active':
@@ -173,6 +178,7 @@ function MyListings() {
                 key={listing._id} 
                 listing={listing} 
                 onEdit={handleEdit}
+                onDelete={handleDelete}
                 showEditButton={true}
               />
             ))}

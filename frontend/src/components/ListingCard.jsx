@@ -1,9 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'timeago.js';
-import { FaEdit } from 'react-icons/fa';
+import { FaEdit, FaTrash } from 'react-icons/fa';
+import listingService from '../services/listingService';
 
-function ListingCard({ listing, onEdit, showEditButton = false }) {
+function ListingCard({ listing, onEdit, showEditButton = false, onDelete }) {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -13,6 +14,21 @@ function ListingCard({ listing, onEdit, showEditButton = false }) {
   const handleEditClick = (e) => {
     e.stopPropagation(); // Prevent the card click event
     onEdit(listing);
+  };
+
+  const handleDeleteClick = async (e) => {
+    e.stopPropagation(); // Prevent the card click event
+    if (window.confirm('Are you sure you want to delete this listing?')) {
+      try {
+        await listingService.deleteListing(listing._id);
+        if (onDelete) {
+          onDelete(listing._id);
+        }
+      } catch (error) {
+        console.error('Error deleting listing:', error);
+        alert('Failed to delete listing. Please try again.');
+      }
+    }
   };
 
   // Function to format the date
@@ -47,16 +63,27 @@ function ListingCard({ listing, onEdit, showEditButton = false }) {
             e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
           }}
         />
-        <div className="absolute top-2 right-2 flex gap-2">
+        <div className="absolute top-2 left-2 flex gap-2">
           {showEditButton && (
-            <button
-              onClick={handleEditClick}
-              className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 transition-colors"
-              title="Edit listing"
-            >
-              <FaEdit className="w-4 h-4 text-gray-600" />
-            </button>
+            <>
+              <button
+                onClick={handleEditClick}
+                className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 transition-colors"
+                title="Edit listing"
+              >
+                <FaEdit className="w-4 h-4 text-gray-600" />
+              </button>
+              <button
+                onClick={handleDeleteClick}
+                className="p-2 bg-white rounded-full shadow-sm hover:bg-red-100 transition-colors"
+                title="Delete listing"
+              >
+                <FaTrash className="w-4 h-4 text-red-600" />
+              </button>
+            </>
           )}
+        </div>
+        <div className="absolute top-2 right-2">
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
             listing.status === 'sold' ? 'bg-red-100 text-red-800' :
             listing.status === 'active' ? 'bg-green-100 text-green-800' :
