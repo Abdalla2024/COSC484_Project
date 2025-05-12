@@ -24,7 +24,7 @@ import VerifyComplete from './pages/VerifyComplete';
 
 function App() {
   const location = useLocation();
-  const isAuthPage = ['signin', 'signup', 'verify-pending'].includes(location.pathname.slice(1));
+  const isAuthPage = ['signin', 'signup', 'verify-pending', 'verify-complete'].includes(location.pathname.slice(1));
 
   if (isAuthPage) {
     return (
@@ -33,6 +33,7 @@ function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/verify-pending" element={<VerifyPage />} />
+          <Route path="/verify-complete" element={<VerifyComplete />} />
         </Routes>
       </div>
     );

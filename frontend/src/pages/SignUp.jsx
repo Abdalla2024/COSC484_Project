@@ -6,6 +6,7 @@ import { auth } from '../auth/firebaseconfig';
 
 //const HOME_PAGE = 'http://localhost:5173/verify-complete';
 const HOME_PAGE = 'https://cosc-484-project-front.vercel.app/verify-complete';
+//const HOME_PAGE = '/verify-complete';  // git add . git commit -m "What im doing" git push origin feature/flickering-email-verification
 
 const API_URL = 'http://localhost:3000/api';
 
