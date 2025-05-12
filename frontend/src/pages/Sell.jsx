@@ -61,6 +61,9 @@ function Sell() {
       const fetchUserMongoId = async () => {
         try {
           const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
+            
+          console.log('Fetching user data from:', `${API_URL}/api/users/sync`, 'Environment:', isDevelopment ? 'development' : 'production');
+          
           const res = await fetch(`${API_URL}/api/users/sync`, {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
@@ -71,14 +74,6 @@ function Sell() {
               photoURL: user.photoURL
             })
           });
-          const userData = await res.json();
-          console.log('Current user MongoDB ID:', userData._id);
-          setCurrentUserId(userData._id);
-        } catch (error) {
-          console.error('Error fetching user MongoDB ID:', error);
-          setError('Failed to authenticate user. Please try again.');
-        }
-      };
           
           if (!res.ok) {
             throw new Error(`Failed to sync user: ${res.status} ${res.statusText}`);
