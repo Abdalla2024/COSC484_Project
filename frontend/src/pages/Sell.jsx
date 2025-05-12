@@ -3,7 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../auth/firebaseconfig';
 import listingService from '../services/listingService';
-import { handleImageUpload, storage } from "../auth/firebaseconfig.js";
+
+
+const uploadImageToCloudinary = async (file) => {
+  const url = `https://api.cloudinary.com/v1_1/dcg7xwnc6/image/upload`;
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "preset");
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || "Upload failed");
+    return data.secure_url;
+  } catch (err) {
+    console.error("Cloudinary upload error:", err);
+    throw err;
+  }
+};
 
 
 function Sell() {
@@ -117,7 +138,7 @@ function Sell() {
     try {
       setError('Uploading images...');
       // 1. Upload all images to Firebase
-      const uploadPromises = images.map((file) => handleImageUpload(file));
+      const uploadPromises = images.map((file) => uploadImageToCloudinary(file));
       const imageUrls = await Promise.all(uploadPromises);
 
       // 2. Prepare listing data
