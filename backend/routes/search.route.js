@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose')
-const { connectToDatabase } = require('../config/mongodb'); // Adjust path as needed
-
-connectToDatabase();
+const Message = require('../models/message');
+const Listing = require('../models/listing');
+const User = require('../models/user');
 
 // Search Messages Route
 router.get('/messages', async (req, res) => {
@@ -13,48 +12,74 @@ router.get('/messages', async (req, res) => {
   }
 
   try {
-    const Message = mongoose.connection.db.collection('messages');
-    const messages = await Message.aggregate([
-      {
-        $match: {
+    // First, find messages matching the content
+    const messages = await Message.find({
       content: { $regex: searchTerm, $options: "i" }
-        }
-      },
-      { $sort: { timestamp: -1 } },
-      {
-        $project: {
-          _id: 1,
-          senderId: 1,
-          receiverId: 1,
-          content: 1,
-          timestamp: 1,
-          read: 1
-        }
-      }
-    ]).toArray();
+    })
+    .sort({ timestamp: -1 })
+    .select('_id senderId receiverId content timestamp read')
+    .lean();
 
-    res.json(messages);
+    // Get unique user IDs from the messages
+    const userIds = [...new Set(messages.flatMap(msg => [msg.senderId, msg.receiverId]))];
+
+    // Find all users involved in these messages
+    const users = await User.find({
+      firebaseId: { $in: userIds }
+    }).select('_id firebaseId displayName photoURL').lean();
+
+    // Create a map of user IDs to user data
+    const userMap = users.reduce((map, user) => {
+      map[user.firebaseId] = user;
+      return map;
+    }, {});
+
+    // Also search for users by display name
+    const usersByName = await User.find({
+      displayName: { $regex: searchTerm, $options: "i" }
+    }).select('_id firebaseId displayName photoURL').lean();
+
+    // Get messages for users found by name
+    const messagesByUser = await Message.find({
+      $or: [
+        { senderId: { $in: usersByName.map(u => u.firebaseId) } },
+        { receiverId: { $in: usersByName.map(u => u.firebaseId) } }
+      ]
+    })
+    .sort({ timestamp: -1 })
+    .select('_id senderId receiverId content timestamp read')
+    .lean();
+
+    // Combine and deduplicate messages
+    const allMessages = [...messages, ...messagesByUser];
+    const uniqueMessages = Array.from(new Map(allMessages.map(msg => [msg._id.toString(), msg])).values());
+
+    // Add user data to messages
+    const messagesWithUsers = uniqueMessages.map(msg => ({
+      ...msg,
+      sender: userMap[msg.senderId] || null,
+      receiver: userMap[msg.receiverId] || null
+    }));
+
+    res.json(messagesWithUsers);
   } catch (error) {
     console.error("Error fetching messages:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
+// Search Listings Route
 router.get('/listings', async (req, res) => {
   const searchTerm = req.query.q || "";
   const category = req.query.category;
   
   try {
-      const db = mongoose.connection.db.collection('listings');
-  
     let query = {};
     
-      // If a category is provided, include it in the query
     if (category) {
       query.category = category;
     }
     
-      // If a search term is provided, apply the $or condition
     if (searchTerm.trim()) {
       query.$or = [
         { title: { $regex: searchTerm, $options: "i" } },
@@ -62,7 +87,7 @@ router.get('/listings', async (req, res) => {
       ];
     }
     
-      const listings = await db.find(query).toArray();
+    const listings = await Listing.find(query).lean();
     res.json(listings);
   } catch (error) {
     console.error("Error fetching listings:", error);
