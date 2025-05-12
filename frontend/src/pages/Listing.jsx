@@ -4,6 +4,8 @@ import ListingCard from '../components/ListingCard';
 import { format } from 'timeago.js';
 import AccountPFP from '../components/AccountPFP';
 import listingService from '../services/listingService';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { handleImageUpload, storage } from '../auth/firebaseconfig.js';
 
 function Listing() {
   const [selectedImage, setSelectedImage] = useState(0);

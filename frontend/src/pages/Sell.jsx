@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../auth/firebaseconfig';
 import listingService from '../services/listingService';
+import { handleImageUpload, storage } from "../auth/firebaseconfig.js";
+
 
 function Sell() {
   const categories = ['Textbooks', 'Electronics', 'Furniture', 'Clothing', 'School Supplies', 'Dorm Essentials', 
@@ -91,30 +93,17 @@ function Sell() {
     }));
   };
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length > 5) {
-      setError('Maximum 5 images allowed');
-      return;
-    }
-    
-    // Create preview URLs
-    const newPreviewUrls = files.map(file => URL.createObjectURL(file));
-    setPreviewUrls(newPreviewUrls); // Replace existing previews
-    
-    // Store the actual files
-    setImages(files); // Replace existing files
-    setError('');
-  };
+  const handleImageChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+  setImages(selectedFiles);
 
-  const removeImage = (index) => {
-    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
-    setImages(prev => prev.filter((_, i) => i !== index));
-    setError('');
+  const urls = selectedFiles.map((file) => URL.createObjectURL(file));
+  setPreviewUrls(urls);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     if (images.length < 3) {
       setError('Please upload at least 3 photos of your item');
       return;
@@ -126,24 +115,28 @@ function Sell() {
     }
 
     try {
-      // Format the data according to the backend model requirements
+      setError('Uploading images...');
+      // 1. Upload all images to Firebase
+      const uploadPromises = images.map((file) => handleImageUpload(file));
+      const imageUrls = await Promise.all(uploadPromises);
+
+      // 2. Prepare listing data
       const listingData = {
         title: productData.title,
         description: productData.description,
         price: parseFloat(productData.price),
         category: productData.category,
         condition: condition,
-        images: previewUrls, // For now, using preview URLs
+        images: imageUrls,
         deliveryMethod: deliveryMethod,
         meetupLocation: showLocationInput ? meetupLocation : undefined,
         status: 'active',
-        // Use the current user's MongoDB ID
         sellerId: currentUserId
       };
       
       console.log('Creating listing with sellerId:', currentUserId);
 
-      // Submit to backend
+      // 3. Send to backend
       await listingService.createListing(listingData);
       
       // Redirect to home page on success
@@ -354,7 +347,7 @@ function Sell() {
                       className="w-full h-full object-cover rounded-lg"
                     />
                     <button
-                      onClick={() => removeImage(index)}
+                      onClick={() => setPreviewUrls(prev => prev.filter((_, i) => i !== index))}
                       className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -378,7 +371,7 @@ function Sell() {
                       className="hidden"
                       accept="image/*"
                       multiple
-                      onChange={handleImageUpload}
+                      onChange={handleImageChange}
                     />
                   </label>
                 )}
@@ -410,7 +403,10 @@ function Sell() {
                   (showLocationInput && !meetupLocation)
                 }
               >
-                List Item
+                {previewUrls.length < 3 || !condition || !deliveryMethod || 
+                  (showLocationInput && !meetupLocation)
+                  ? 'Uploading...'
+                  : 'List Item'}
               </button>
             </div>
           </form>
