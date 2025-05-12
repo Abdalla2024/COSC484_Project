@@ -1,36 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ListingCard from '../components/ListingCard';
 import EditListingModal from '../components/EditListingModal';
 import listingService from '../services/listingService';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '../auth/firebaseconfig';
+import { useNavigate } from 'react-router-dom';
+import userService from '../services/userService';
 
-function Listing() {
+function MyListings() {
+  const [user, loading] = useAuthState(auth);
+  const [listings, setListings] = useState([]);
+  const [loadingListings, setLoadingListings] = useState(true);
+  const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState(null);
-  
-  // This would normally come from your backend
-  const mockListings = [
-    {
-      id: 1,
-      title: "Computer Science Textbook",
-      description: "Latest edition, barely used",
-      price: 75.00,
-      status: "active",
-      imageUrl: "https://picsum.photos/seed/1/800/600",
-      date: "2024-03-15",
-      offers: 2
-    },
-    {
-      id: 2,
-      title: "Calculator TI-84",
-      description: "Good condition",
-      price: 45.00,
-      status: "sold",
-      imageUrl: "https://picsum.photos/seed/2/800/600",
-      date: "2024-03-10",
-      offers: 0
-    },
-  ];
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/signin');
+    }
+  }, [user, loading, navigate]);
+
+  // Fetch Listings for user
+  useEffect(() => {
+    if (user) {
+      getListingByUserID();
+    }
+  }, [user]);
+
+  const getListingByUserID = async () => {
+    try {
+      setLoadingListings(true);
+      setError(null);
+      console.log("Attempting to fetch listing for user", user.uid);
+      const listingData = await userService.getUserListings(user.uid);
+      setListings(listingData);
+    } catch (error) {
+      console.error("Error fetching user listings:", error);
+      setError(error.message || "Failed to fetch listings");
+    } finally {
+      setLoadingListings(false);
+    }
+  };
 
   const filters = [
     { id: 'all', label: 'All Listings' },
@@ -47,18 +60,41 @@ function Listing() {
 
   const handleSaveEdit = async (updatedData) => {
     try {
-      const updated = await listingService.updateListing(selectedListing._id, updatedData);
-      console.log('Listing updated:', updated);
-  
-      // Update local state if you're storing real listings
+      console.log('Selected listing:', selectedListing);
+      console.log('Form data being sent:', updatedData);
+      
+      if (!selectedListing || !selectedListing._id) {
+        throw new Error('No listing selected or missing ID');
+      }
+
+      // Convert price to number if it's a string
+      const dataToSend = {
+        ...updatedData,
+        price: Number(updatedData.price)
+      };
+      
+      console.log('Data being sent to API:', dataToSend);
+      console.log('Listing ID:', selectedListing._id);
+      
+      const updated = await listingService.updateListing(selectedListing._id, dataToSend);
+      console.log('Response from API:', updated);
+      
+      // Update the listings array with the updated listing
+      setListings(prevListings => 
+        prevListings.map(listing => 
+          listing._id === updated._id ? { ...listing, ...updated } : listing
+        )
+      );
+      
       setIsEditModalOpen(false);
       setSelectedListing(null);
     } catch (error) {
       console.error('Error updating listing:', error);
+      setError(error.message || "Failed to update listing");
     }
   };
 
-  const filteredListings = mockListings.filter(listing => {
+  const filteredListings = listings.filter(listing => {
     switch (activeFilter) {
       case 'active':
         return listing.status === 'active';
@@ -69,11 +105,27 @@ function Listing() {
       case 'recent':
         // Filter listings from last 7 days
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        return new Date(listing.date) > sevenDaysAgo;
+        return new Date(listing.createdAt) > sevenDaysAgo;
       default:
         return true;
     }
   });
+
+  if (loading || loadingListings) {
+    return (
+      <div className="absolute inset-0 bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading listings...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="absolute inset-0 bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="text-xl text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 bg-gray-50 pt-20">
@@ -102,10 +154,10 @@ function Listing() {
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { label: 'Total Listings', value: mockListings.length },
-              { label: 'Active Listings', value: mockListings.filter(l => l.status === 'active').length },
-              { label: 'Items Sold', value: mockListings.filter(l => l.status === 'sold').length },
-              { label: 'Active Offers', value: mockListings.reduce((acc, curr) => acc + curr.offers, 0) }
+              { label: 'Total Listings', value: listings.length },
+              { label: 'Active Listings', value: listings.filter(l => l.status === 'active').length },
+              { label: 'Items Sold', value: listings.filter(l => l.status === 'sold').length },
+              { label: 'Active Offers', value: listings.reduce((acc, curr) => acc + (curr.offers || 0), 0) }
             ].map((stat, index) => (
               <div key={index} className="bg-white rounded-lg p-4 shadow-sm">
                 <div className="text-sm text-gray-500">{stat.label}</div>
@@ -118,7 +170,7 @@ function Listing() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredListings.map(listing => (
               <ListingCard 
-                key={listing.id} 
+                key={listing._id} 
                 listing={listing} 
                 onEdit={handleEdit}
                 showEditButton={true}
@@ -149,4 +201,4 @@ function Listing() {
   );
 }
 
-export default Listing; 
+export default MyListings; 

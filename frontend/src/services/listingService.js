@@ -11,12 +11,13 @@ export const listingService = {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         }
       });
       
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch listings');
+        throw new Error(error.error || `Failed to fetch listings: ${response.status}`);
       }
       return await response.json();
     } catch (error) {
@@ -41,7 +42,7 @@ export const listingService = {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to create listing');
+        throw new Error(error.error || `Failed to create listing: ${response.status}`);
       }
       return await response.json();
     } catch (error) {
@@ -64,7 +65,7 @@ export const listingService = {
       if (!response.ok) {
         console.error(`Error response from server: ${response.status} ${response.statusText}`);
         const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch listing');
+        throw new Error(error.error || `Failed to fetch listing: ${response.status}`);
       }
       
       const data = await response.json();
@@ -76,27 +77,50 @@ export const listingService = {
       throw error;
     }
   },
+
   updateListing: async (id, updateData) => {
     try {
-       // Log the data being sent
-       console.log('Sending updated listing data:', updateData);
+      console.log('Raw update data:', updateData);
+      console.log('Data types:', {
+        title: typeof updateData.title,
+        description: typeof updateData.description,
+        price: typeof updateData.price,
+        condition: typeof updateData.condition,
+        category: typeof updateData.category,
+        status: typeof updateData.status,
+        deliveryMethod: typeof updateData.deliveryMethod
+      });
 
-       const response = await fetch(`${API_URL}/listing/${id}`, {
-         method: 'PATCH',
-         headers: {
-           'Content-Type': 'application/json',
-         },
-         body: JSON.stringify(updateData)
-       });
- 
-       if (!response.ok) {
-         const error = await response.json();
-         throw new Error(error.error || 'Failed to update listing');
-       }
-       return await response.json();
+      // Ensure the ID is a string
+      const listingId = id.toString();
+      const url = `${API_URL}/api/listing/${listingId}`;
+      console.log('Update URL:', url);
 
-    } catch(error){
-      console.error('Error updating this listing try again later')
+      // Log the exact data being sent
+      const requestBody = JSON.stringify(updateData);
+      console.log('Request body:', requestBody);
+
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: requestBody
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error(errorData.error || `Failed to update listing: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Update successful:', data);
+      return data;
+    } catch (error) {
+      console.error('Error updating listing:', error);
+      throw error;
     }
   }
 };
