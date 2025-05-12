@@ -61,7 +61,7 @@ function App() {
           <Route path="/orders/:orderId" element={<Orders />} />
           <Route path="/disputes/:orderId" element={<Dispute />} />
           <Route path="/reviews/:sellerId" element={<Reviews />} />
-          <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+          <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
 
         </Routes>
       </div>

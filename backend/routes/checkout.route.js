@@ -21,8 +21,8 @@ router.post('/create-checkout-session', async (req, res) => {
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: `http://cosc-484-project-front.vercel.app/order-confirmation/${id}`,
-      cancel_url: `http://cosc-484-project-front.vercel.app/checkout/${id}`,
+      success_url: `https://cosc-484-project-front.vercel.app/order-confirmation/${id}`,
+      cancel_url: `https://cosc-484-project-front.vercel.app/checkout/${id}`,
       metadata: {
         listingId: id,
         title,
