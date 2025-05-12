@@ -8,6 +8,7 @@ const Message = require('./models/message');
 const User    = require('./models/user');
 const Review  = require('./models/review');
 const reviewRoutes = require('./routes/review.route');
+const checkoutRoutes = require('./routes/checkout.route');
 const searchRoutes = require('./routes/search.route')
 
 const app = express();
@@ -33,9 +34,12 @@ app.get('/', (req, res) => {
 // Mount review routes
 app.use('/api/reviews', reviewRoutes);
 
+//checkout route
+app.use('/api/checkout', checkoutRoutes);
 app.use('/api/search',searchRoutes)
 
-// ── LISTING ENDPOINTS ───────────────────────────────────────────────────────────
+
+// ── LISTING ENDPOINTS 
 // GET all listings
 app.get('/api/listing', async (req, res, next) => {
   try {
@@ -216,7 +220,57 @@ app.post('/api/listing', async (req, res, next) => {
   }
 });
 
-// ── USER ENDPOINTS ──────────────────────────────────────────────────────────────
+
+// UPDATE a listing by ID
+app.patch('/api/listing/:id', async (req, res, next) => {
+  try {
+    console.log('Updating listing with ID:', req.params.id);
+    console.log('Update data:', req.body);
+
+    const listing = await Listing.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    ).lean();
+
+    if (!listing) {
+      return res.status(404).json({ error: 'Listing not found' });
+    }
+
+    // Convert ObjectIDs to strings
+    listing._id = listing._id.toString();
+    if (listing.sellerId) {
+      listing.sellerId = listing.sellerId.toString();
+    }
+
+    // Fetch seller information
+    if (listing.sellerId) {
+      const seller = await User.findById(listing.sellerId).lean();
+      if (seller) {
+        listing.seller = {
+          _id: seller._id.toString(),
+          username: seller.username || seller.email.split('@')[0],
+          displayName: seller.displayName || seller.username,
+          email: seller.email,
+          photoURL: seller.photoURL,
+          profileImage: seller.photoURL
+        };
+      }
+    }
+
+    console.log('Updated listing:', listing);
+    res.json(listing);
+  } catch (err) {
+    console.error('Error updating listing:', err);
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
+    next(err);
+  }
+});
+
+// ── USER ENDPOINTS 
+
 // Sync (upsert) user on sign-in (returns full Mongo record including _id)
 app.post('/api/users/sync', async (req, res, next) => {
   try {
@@ -275,7 +329,7 @@ app.get('/api/users/:userId', async (req, res, next) => {
   }
 });
 
-// ── MESSAGING ENDPOINTS ────────────────────────────────────────────────────────
+// ── MESSAGING ENDPOINTS 
 // Send a new message
 app.post('/api/messages', async (req, res, next) => {
   try {
@@ -326,7 +380,7 @@ app.post('/api/messages', async (req, res, next) => {
   }
 });
 
-// ── Get all messages involving this Mongo userId ──
+// Get all messages involving this Mongo userId
 app.get('/api/messages/user/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -380,7 +434,7 @@ app.get('/api/messages/user/:userId', async (req, res) => {
   }
 });
 
-// ── Get one‐to‐one thread between two ObjectIds ──
+// Get one‐to‐one thread between two ObjectIds
 app.get('/api/messages/:userId/:otherUserId', async (req, res) => {
   try {
     const { userId, otherUserId } = req.params;

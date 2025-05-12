@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../auth/firebaseconfig';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import useDebounce from '../hooks/useDebounce';
 
 const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || 'http://localhost:3000';
@@ -402,9 +402,9 @@ export default function Messages() {
                   </span>
                 </div>
               )}
-              <h2 className="mt-2 text-lg font-semibold text-black">
+              <Link to={`/profile/${selectedUser.id}`} className="mt-2 text-lg font-semibold text-black hover:text-blue-600 transition-colors">
                 {selectedUser.displayName}
-              </h2>
+              </Link>
             </div>
             
             {/* Messages */}

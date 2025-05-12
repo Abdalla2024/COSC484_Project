@@ -6,19 +6,22 @@ function EditListingModal({ isOpen, onClose, listing, onSave }) {
     title: '',
     description: '',
     price: '',
-    condition: '',
     category: '',
-    status: ''
+    condition: 'New',
+    deliveryMethod: 'Meetup',
+    status: 'active'
   });
 
   useEffect(() => {
     if (listing) {
+      console.log('Setting form data from listing:', listing);
       setFormData({
         title: listing.title || '',
         description: listing.description || '',
         price: listing.price || '',
-        condition: listing.condition || '',
         category: listing.category || '',
+        condition: listing.condition || '',
+        deliveryMethod: listing.deliveryMethod || 'Meetup',
         status: listing.status || 'active'
       });
     }
@@ -34,7 +37,21 @@ function EditListingModal({ isOpen, onClose, listing, onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    console.log('Form data before submission:', formData);
+    
+    // Ensure all required fields are present and properly formatted
+    const formattedData = {
+      title: formData.title,
+      description: formData.description,
+      price: Number(formData.price),
+      category: formData.category,
+      condition: formData.condition,
+      deliveryMethod: formData.deliveryMethod,
+      status: formData.status
+    };
+
+    console.log('Formatted data being sent:', formattedData);
+    onSave(formattedData);
   };
 
   if (!isOpen) return null;
@@ -109,6 +126,29 @@ function EditListingModal({ isOpen, onClose, listing, onSave }) {
               </div>
 
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border-2 border-[#FFBB00] rounded-lg shadow-sm focus:ring-2 focus:ring-[#FFBB00] focus:border-[#FFBB00] transition-colors text-black"
+                  required
+                >
+                  <option value="">Select category</option>
+                  <option value="Textbooks">Textbooks</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Furniture">Furniture</option>
+                  <option value="Clothing">Clothing</option>
+                  <option value="School Supplies">School Supplies</option>
+                  <option value="Dorm Essentials">Dorm Essentials</option>
+                  <option value="Sports Equipment">Sports Equipment</option>
+                  <option value="Musical Instruments">Musical Instruments</option>
+                  <option value="Art Supplies">Art Supplies</option>
+                  <option value="Lab Equipment">Lab Equipment</option>
+                </select>
+              </div>
+
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Condition</label>
                 <select
                   name="condition"
@@ -119,7 +159,7 @@ function EditListingModal({ isOpen, onClose, listing, onSave }) {
                 >
                   <option value="">Select condition</option>
                   <option value="new">New</option>
-                  <option value="like-new">Like New</option>
+                  <option value="like new">Like New</option>
                   <option value="good">Good</option>
                   <option value="fair">Fair</option>
                   <option value="poor">Poor</option>
@@ -127,20 +167,17 @@ function EditListingModal({ isOpen, onClose, listing, onSave }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Method</label>
                 <select
-                  name="category"
-                  value={formData.category}
+                  name="deliveryMethod"
+                  value={formData.deliveryMethod}
                   onChange={handleChange}
                   className="w-full px-3 py-2 bg-white border-2 border-[#FFBB00] rounded-lg shadow-sm focus:ring-2 focus:ring-[#FFBB00] focus:border-[#FFBB00] transition-colors text-black"
                   required
                 >
-                  <option value="">Select category</option>
-                  <option value="textbooks">Textbooks</option>
-                  <option value="electronics">Electronics</option>
-                  <option value="furniture">Furniture</option>
-                  <option value="clothing">Clothing</option>
-                  <option value="other">Other</option>
+                  <option value="Shipping">Shipping</option>
+                  <option value="Meetup">Meetup</option>
+                  <option value="Both">Both</option>
                 </select>
               </div>
 
