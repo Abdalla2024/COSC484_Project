@@ -213,6 +213,54 @@ app.post('/api/listing', async (req, res, next) => {
   }
 });
 
+// UPDATE a listing by ID
+app.patch('/api/listing/:id', async (req, res, next) => {
+  try {
+    console.log('Updating listing with ID:', req.params.id);
+    console.log('Update data:', req.body);
+
+    const listing = await Listing.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    ).lean();
+
+    if (!listing) {
+      return res.status(404).json({ error: 'Listing not found' });
+    }
+
+    // Convert ObjectIDs to strings
+    listing._id = listing._id.toString();
+    if (listing.sellerId) {
+      listing.sellerId = listing.sellerId.toString();
+    }
+
+    // Fetch seller information
+    if (listing.sellerId) {
+      const seller = await User.findById(listing.sellerId).lean();
+      if (seller) {
+        listing.seller = {
+          _id: seller._id.toString(),
+          username: seller.username || seller.email.split('@')[0],
+          displayName: seller.displayName || seller.username,
+          email: seller.email,
+          photoURL: seller.photoURL,
+          profileImage: seller.photoURL
+        };
+      }
+    }
+
+    console.log('Updated listing:', listing);
+    res.json(listing);
+  } catch (err) {
+    console.error('Error updating listing:', err);
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
+    next(err);
+  }
+});
+
 // ── USER ENDPOINTS ──────────────────────────────────────────────────────────────
 // Sync (upsert) user on sign-in (returns full Mongo record including _id)
 app.post('/api/users/sync', async (req, res, next) => {
