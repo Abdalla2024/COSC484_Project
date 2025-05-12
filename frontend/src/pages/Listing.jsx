@@ -53,9 +53,6 @@ function Listing() {
             console.error('Error fetching seller:', sellerErr);
           }
         }
-
-        // After getting the current listing, fetch similar listings
-        fetchSimilarListings(data.category);
       } catch (err) {
         setError(err.message || 'Failed to fetch listing');
       } finally {
