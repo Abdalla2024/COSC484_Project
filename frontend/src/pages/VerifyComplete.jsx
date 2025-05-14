@@ -14,11 +14,13 @@ function VerifyComplete() {
         console.log("Finish");
         console.log(mode, oobCode, params);
         if (mode === "verifyEmail" && oobCode) {
+
             applyActionCode(auth, oobCode).then(() => {
-                //alert("Email Verified");
-                navigate("/");
+                // Email Verified 
+                navigate("https://cosc-484-project-front.vercel.app");
             })
                 .catch((error) => {
+                    navigate("https://cosc-484-project-front.vercel.app");
                     console.error("Verification Error", error.message);
                 });
         }
