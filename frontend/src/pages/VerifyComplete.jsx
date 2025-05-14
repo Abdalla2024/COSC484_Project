@@ -1,11 +1,12 @@
 import { applyActionCode } from "firebase/auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../auth/firebaseconfig";
 
 function VerifyComplete() {
 
     const navigate = useNavigate();
+    const [isVerified, setIsVerified] = useState(false);
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -14,11 +15,15 @@ function VerifyComplete() {
         console.log("Finish");
         console.log(mode, oobCode, params);
         if (mode === "verifyEmail" && oobCode) {
+
             applyActionCode(auth, oobCode).then(() => {
-                //alert("Email Verified");
-                navigate("/");
+                setIsVerified(true);
+                // Email Verified 
+                navigate("https://cosc-484-project-front.vercel.app");
             })
                 .catch((error) => {
+                    setIsVerified(true);
+                    navigate("https://cosc-484-project-front.vercel.app");
                     console.error("Verification Error", error.message);
                 });
         }
@@ -29,7 +34,7 @@ function VerifyComplete() {
             <div className="w-full max-w-md mx-4 space-y-8 p-8 bg-white rounded-lg shadow-md border border-gray-200">
                 <div>
                     <h2 className="text-left text-3xl font-extrabold text-gray-700">
-                        Verifying...
+                        {isVerified ? "Verified" : "Still Verifying..."}
                     </h2>
                 </div>
             </div>
